@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
+
 @Entity(name = "users")
 public class AuthenticationUser {
 
@@ -15,8 +17,14 @@ public class AuthenticationUser {
     @Email
     @Column(unique = true)
     private String email;
+    private Boolean emailVerified = false;
+    private String emailVerificationToken = null;
+    private LocalDateTime emailVerificationTokenExpiryDate = null;
     @JsonIgnore
     private String password;
+    private String passwordResetToken = null;
+    private LocalDateTime passwordResetTokenExpiryDate = null;
+
 
     public AuthenticationUser(String email, String password) {
         this.email = email;
@@ -39,6 +47,16 @@ public class AuthenticationUser {
         return password;
     }
 
+    public Boolean getEmailVerified() { return emailVerified; }
+
+    public String getEmailVerificationToken() { return emailVerificationToken; }
+
+    public LocalDateTime getEmailVerificationTokenExpiryDate() { return emailVerificationTokenExpiryDate; }
+
+    public String getPasswordResetToken() { return passwordResetToken; }
+
+    public LocalDateTime getPasswordResetTokenExpiryDate() { return passwordResetTokenExpiryDate; }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -51,4 +69,16 @@ public class AuthenticationUser {
         this.password = password;
     }
 
+    public void setEmailVerified(Boolean emailVerified) { this.emailVerified = emailVerified; }
+
+    public void setEmailVerificationToken(String emailVerificationToken) {
+        this.emailVerificationToken = emailVerificationToken; }
+
+    public void setEmailVerificationTokenExpiryDate(LocalDateTime emailVerificationTokenExpiryDate) {
+        this.emailVerificationTokenExpiryDate = emailVerificationTokenExpiryDate; }
+
+    public void setPasswordResetToken(String passwordResetToken) { this.passwordResetToken = passwordResetToken; }
+
+    public void setPasswordResetTokenExpiryDate(LocalDateTime passwordResetTokenExpiryDate) {
+        this.passwordResetTokenExpiryDate = passwordResetTokenExpiryDate; }
 }
