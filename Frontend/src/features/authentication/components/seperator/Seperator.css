@@ -1,0 +1,16 @@
+.seperator-root {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    margin-block: 1rem;
+}
+
+.seperator-root::before,
+.seperator-root::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.15);
+    margin: 1rem 0;
+}

@@ -1,0 +1,13 @@
+form {
+    margin-top: 1rem;
+}
+
+.success-message {
+    color: green;
+    margin-top: 0.5rem;
+}
+
+.error-message {
+    color: red;
+    margin-top: 0.5rem;
+}
