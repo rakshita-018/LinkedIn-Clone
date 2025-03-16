@@ -18,7 +18,7 @@ import java.util.Optional;
 @Service
 public class AuthenticationService {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
-    private final AuthenticationUserRepository authenticationUserRepository;
+    private static AuthenticationUserRepository authenticationUserRepository;
     private final int durationInMinutes = 1;
 
     private final Encoder encoder;
@@ -159,5 +159,23 @@ public class AuthenticationService {
         }
     }
 
+    public AuthenticationUser updateUserProfile(Long userId, String firstName, String lastName, String company, String position, String location){
+        AuthenticationUser user = authenticationUserRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        if (firstName != null)
+            user.setFirstName(firstName);
+        if (lastName != null)
+            user.setLastName(lastName);
+        if (company != null)
+            user.setCompany(company);
+        if (position != null)
+            user.setPosition(position);
+        if (location != null)
+            user.setLocation(location);
 
+        return authenticationUserRepository.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        authenticationUserRepository.deleteById(id);
+    }
 }

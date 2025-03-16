@@ -1,0 +1,86 @@
+package com.linkedIn.features.feed.service;
+
+import com.linkedIn.features.authentication.model.AuthenticationUser;
+import com.linkedIn.features.authentication.repository.AuthenticationUserRepository;
+import com.linkedIn.features.feed.dto.PostDto;
+import com.linkedIn.features.feed.model.Post;
+import com.linkedIn.features.feed.repository.PostRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Set;
+
+@Service
+public class FeedService {
+
+    private final PostRepository postRepository;
+    private final AuthenticationUserRepository userRepository;
+
+    public FeedService(PostRepository postRepository, AuthenticationUserRepository userRepository) {
+        this.postRepository = postRepository;
+        this.userRepository = userRepository;
+    }
+
+    public Post createPost(PostDto postDto, Long authorId ) {
+        AuthenticationUser author = userRepository.findById(authorId).orElseThrow(() -> new IllegalArgumentException("user not found"));
+        Post post = new Post(postDto.getContent(), author);
+        post.setPicture(postDto.getPicture());
+        return postRepository.save(post);
+    }
+
+    public Post editPost(Long postId, Long userId, PostDto postDto) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("post not found"));
+        AuthenticationUser user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("user not found"));
+
+        if(!post.getAuthor().equals(user)){
+            throw new IllegalArgumentException("User is not the author of the post");
+        }
+        post.setContent(postDto.getContent());
+        post.setPicture(postDto.getPicture());
+        return postRepository.save(post);
+    }
+
+    public List<Post> getFeedPost(Long authenticatedUserId) {
+        return postRepository.findByAuthorIdNotOrderByCreationDateDesc(authenticatedUserId);
+    }
+
+    public List<Post> getAllPost() {
+        return postRepository.findAllByOrderByCreationDateDesc();
+    }
+
+    public Post getPost(Long postId) {
+        return postRepository.findById(postId).orElseThrow(() ->
+                new IllegalArgumentException("Post not found"));
+    }
+
+    public void deletePost(Long postId, Long userId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        AuthenticationUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (!post.getAuthor().equals(user)) {
+            throw new IllegalArgumentException("User is not the author of the post");
+        }
+        postRepository.delete(post);
+    }
+
+    public List<Post> getPostsByUserId(Long userId) {
+        return postRepository.findByAuthorId(userId);
+    }
+
+    public Post likePost(Long postId, Long userId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        AuthenticationUser user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        if (post.getLikes().contains(user)) {
+            post.getLikes().remove(user);
+        } else {
+            post.getLikes().add(user);
+        }
+        Post savedPost = postRepository.save(post);
+        return savedPost;
+    }
+
+    public Set<AuthenticationUser> getPostLikes(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        return post.getLikes();
+    }
+}
