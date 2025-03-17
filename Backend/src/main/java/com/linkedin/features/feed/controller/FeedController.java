@@ -1,7 +1,9 @@
 package com.linkedIn.features.feed.controller;
 
 import com.linkedIn.features.authentication.model.AuthenticationUser;
+import com.linkedIn.features.feed.dto.CommentDto;
 import com.linkedIn.features.feed.dto.PostDto;
+import com.linkedIn.features.feed.model.Comment;
 import com.linkedIn.features.feed.model.Post;
 import com.linkedIn.features.feed.service.FeedService;
 import org.apache.coyote.Response;
@@ -72,5 +74,30 @@ public class FeedController {
         Set<AuthenticationUser> likes = feedService.getPostLikes(postId);
         return ResponseEntity.ok(likes);
     }
+
+    @PostMapping("/posts/{postId}/comments")
+    public ResponseEntity<Comment> addComment(@PathVariable Long postId, @RequestBody CommentDto commentDto, @RequestAttribute("authenticatedUser") AuthenticationUser user) {
+        Comment comment = feedService.addComment(postId, user.getId(), commentDto.getContent());
+        return ResponseEntity.ok(comment);
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId, @RequestAttribute("authenticatedUser") AuthenticationUser user) {
+        feedService.deleteComment(commentId, user.getId());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<Comment> editComment(@PathVariable Long commentId, @RequestBody CommentDto commentDto, @RequestAttribute("authenticatedUser") AuthenticationUser user) {
+        Comment comment = feedService.editComment(commentId, user.getId(), commentDto.getContent());
+        return ResponseEntity.ok(comment);
+    }
+
+    @GetMapping("/posts/{postId}/comments")
+    public ResponseEntity<List<Comment>> getComments(@PathVariable Long postId) {
+        List<Comment> comments = feedService.getPostComments(postId);
+        return ResponseEntity.ok(comments);
+    }
+
 
 }

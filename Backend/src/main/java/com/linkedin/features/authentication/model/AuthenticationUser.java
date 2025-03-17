@@ -32,9 +32,8 @@ public class AuthenticationUser {
     private String company = null;
     private String position = null;
     private String location = null;
-
     private Boolean profileComplete = false;
-
+    private String profilePicture = null;
     @JsonIgnore
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
@@ -158,5 +157,13 @@ public class AuthenticationUser {
 
     public void setPosts(List<Post> posts) {
         this.posts = posts;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }

@@ -1,5 +1,6 @@
 package com.linkedIn.features.feed.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.linkedIn.features.authentication.model.AuthenticationUser;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
@@ -7,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @Entity(name = "posts")
@@ -30,6 +32,10 @@ public class Post {
     public void preUpdate(){
         this.updatedDate=LocalDateTime.now();
     }
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 
     @ManyToMany
     @JoinTable(name = "posts_likes", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
@@ -95,5 +101,13 @@ public class Post {
 
     public void setLikes(Set<AuthenticationUser> likes) {
         this.likes = likes;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
 }

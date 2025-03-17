@@ -7,6 +7,9 @@ import com.linkedIn.features.authentication.repository.AuthenticationUserReposit
 import com.linkedIn.features.authentication.utils.EmailService;
 import com.linkedIn.features.authentication.utils.Encoder;
 import com.linkedIn.features.authentication.utils.JsonWebToken;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,6 +27,9 @@ public class AuthenticationService {
     private final Encoder encoder;
     private final JsonWebToken jsonWebToken;
     private final EmailService emailService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public AuthenticationService(AuthenticationUserRepository authenticationUserRepository, Encoder encoder, JsonWebToken jsonWebToken, EmailService emailService) {
         this.authenticationUserRepository = authenticationUserRepository;
@@ -175,7 +181,16 @@ public class AuthenticationService {
         return authenticationUserRepository.save(user);
     }
 
-    public void deleteUser(Long id) {
-        authenticationUserRepository.deleteById(id);
+    @Transactional
+    public void deleteUser(Long userId) {
+        AuthenticationUser user = entityManager.find(AuthenticationUser.class, userId);
+        if (user != null) {
+            entityManager.createNativeQuery("DELETE FROM posts_likes WHERE user_id = :userId")
+                    .setParameter("userId", userId)
+                    .executeUpdate();
+//            entityManager.remove(user);
+            authenticationUserRepository.deleteById(userId);
+        }
+
     }
 }
