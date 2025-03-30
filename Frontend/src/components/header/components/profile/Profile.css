@@ -1,0 +1,55 @@
+.profile-root {}
+
+.profile-toggle {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  border-right: 1px solid #e0e0e0;
+  padding-right: 1rem;
+}
+
+.profile-avatar {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+}
+
+.profile-menu {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  padding: 1rem;
+  border-radius: 0.3rem 0 0.3rem 0.3rem;
+  position: absolute;
+  top: 7rem;
+  right: 1rem;
+  width: min(18rem, 100%);
+}
+
+.profile-name {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.profile-content {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: 3rem 1fr;
+  align-items: center;
+}
+
+.profile-avatar.profile-left {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.profile-links {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.profile-button {
+  margin-bottom: 0.5rem;
+}

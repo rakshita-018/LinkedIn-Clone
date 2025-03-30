@@ -1,0 +1,24 @@
+.input-root {
+    display: grid;
+    gap: 0.5rem;
+    margin-block: 1rem;
+}
+  
+.input-root input {
+    border: 1px solid #6f6f6f99;
+    border-radius: 4px;
+}
+  
+.input-root.large input {
+    padding: 1rem;
+}
+
+.input-root.medium input {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.input-root.small input {
+    padding: 0.2rem;
+    font-size: 0.8rem;
+}

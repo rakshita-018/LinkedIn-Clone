@@ -1,9 +1,8 @@
 import React from 'react';
 import './Login.css'
-import { Layout } from '../../components/layout/Layout'
 import { Box } from "../../components/Box/Box";
-import { Input } from "../../components/input/Input";
-import { Button  } from "../../components/button/Button";
+import { Input } from "../../../../components/input/Input";
+import { Button } from '../../../../components/button/Button';
 import { Seperator } from "../../components/seperator/Seperator";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from 'react';
@@ -42,7 +41,7 @@ export function Login() {
     // }
 
     return (
-        <Layout>
+        <div>
             <Box>
                 <div className="login-root">
                     <h1>Sign in</h1>
@@ -53,11 +52,11 @@ export function Login() {
 
                         {errorMessage && <p className="error">{errorMessage}</p>}
                         <Button type="submit" disabled={isLoading}> {isLoading ? "..." : "Sign in"}</Button>
-                        <Link to="/request-password-reset">Forgot password?</Link>
+                        <Link to="/authentication/request-password-reset">Forgot password?</Link>
                     </form>
                     <Seperator>Or</Seperator>
                     <div className="register">
-                        New to LinkedIn? <Link to="/signup">Join now</Link>
+                        New to LinkedIn? <Link to="/authentication/signup">Join now</Link>
                     </div>
                     
                     {/* <form onSubmit={doLogin}>
@@ -83,6 +82,6 @@ export function Login() {
                     </div> */}
                 </div>
             </Box>
-        </Layout>
+        </div>
     );
 }

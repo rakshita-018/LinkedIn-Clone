@@ -1,8 +1,7 @@
 import { Box } from '../../components/Box/Box'
-import { Layout } from '../../components/layout/Layout'
 import './ResetPassword.css'
-import { Input } from '../../components/input/Input'
-import { Button } from '../../components/button/Button'
+import { Input } from '../../../../components/input/Input'
+import { Button } from '../../../../components/button/Button'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -61,7 +60,7 @@ export function ResetPassword(){
         }
     };
     return(
-        <Layout>
+        <div>
             <Box>
                 <div className="reset-password-root">
                     <h1>Reset Password</h1>
@@ -82,7 +81,7 @@ export function ResetPassword(){
                             {errorMessage && <p className="error-message">{errorMessage}</p>}
                             
                             <Button type="submit" disabled={isLoading} >{isLoading? "..." : "Next"}</Button>
-                            <Button outline onClick={() => navigate("/login")} disabled={isLoading}>{isLoading? "..." : "Back"}</Button>
+                            <Button outline onClick={() => navigate("/authentication/login")} disabled={isLoading}>{isLoading? "..." : "Back"}</Button>
                         </form>
                     ):( 
                         <form
@@ -114,7 +113,7 @@ export function ResetPassword(){
                     }
                 </div>
             </Box>
-        </Layout>     
+        </div>     
     )
 }
 

@@ -13,6 +13,7 @@
 
 html {
   font-family: "Poppins", sans-serif;
+  background-color: #f4f2ee;
 }
 
 img {
@@ -29,4 +30,8 @@ button {
 
 a {
   text-decoration: none;
+}
+
+ul{
+  list-style: none;
 }

@@ -1,0 +1,52 @@
+.rightSidebar-root {
+    background-color: white;
+    border-radius: 0.3rem;
+    border: 1px solid #e0e0e0;
+    padding: 1rem;
+  }
+  
+  .rightSidebar-heading {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  
+  .rightSidebar-items {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .rightSidebar-item {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+  }
+  
+  .rightSidebar-item button {
+    flex-shrink: 0;
+  }
+  
+  .rightSidebar-avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  
+  .rightSidebar-name {
+    font-weight: bold;
+  }
+  
+  .rightSidebar-item button {
+    text-align: left;
+  }
+  
+  .rightSidebar-button {
+    width: auto;
+    margin: 0.3rem 0 0;
+  }
+  
+  .rightSidebar-empty {
+    text-align: center;
+    font-style: italic;
+  }
+  

@@ -13,7 +13,24 @@
     border: none;
     cursor: pointer;
 }
+.button-root svg {
+    width: 1.5rem;
+    height: 1.5rem;
+}
 
+.button-root.large {
+    padding: 0.7rem;
+}
+
+.button-root.medium {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.button-root.small {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+}
 /* Disabled state */
 .button-root:disabled {
     color: black;
@@ -24,6 +41,7 @@
 /* Hover effect for non-disabled buttons */
 .button-root:not(:disabled):hover {
     background-color: var(--primary-color-dark);
+    color: white ;
 }
 
 /* Outline style */
@@ -31,7 +49,8 @@
     background-color: white;
     color: var(--primary-color);
     border: 1px solid rgba(0, 0, 0, 0.6);
-    padding: 0.5rem;
+    /* padding: 0.5rem; */
+    color: black;
     font-weight: normal;
 }
 

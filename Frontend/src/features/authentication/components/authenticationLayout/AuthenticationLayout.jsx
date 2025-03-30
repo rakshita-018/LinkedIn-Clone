@@ -1,9 +1,10 @@
 import React from 'react';
 // import PropTypes from 'prop-types';
 import { Outlet } from 'react-router-dom';
-import './Layout.css';
+import './AuthenticationLayout.css';
 
-export function Layout({ children }) {
+
+export function AuthenticationLayout() {
     return (
         <div className="layout-root">
             <header>
@@ -15,7 +16,6 @@ export function Layout({ children }) {
             </header>
             <main className="container">
                 <Outlet />
-                {children}
             </main>
             <footer>
                 <ul className="container">

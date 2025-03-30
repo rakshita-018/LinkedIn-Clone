@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import "./Signup.css";
 import { Box } from "../../components/Box/Box";
-import { Input } from "../../components/input/Input";
-import { Layout } from "../../components/layout/Layout";
-import { Button  } from "../../components/button/Button";
+import { Input } from "../../../../components/input/Input";
+import { Button } from "../../../../components/button/Button";
 import { Seperator } from "../../components/seperator/Seperator";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthentication } from "../../contexts/AuthenticationContextProvider";
@@ -45,7 +44,7 @@ export function Signup() {
     // }
 
     return (
-        <Layout>
+        <div>
             <Box>
                 <div className="signup-root">
                     <h1>Sign up</h1>
@@ -63,7 +62,7 @@ export function Signup() {
                     </form>
                     <Seperator>Or</Seperator>
                     <div className="register">
-                        Already on LinkedIn? <Link to="/login">Sign in</Link>
+                        Already on LinkedIn? <Link to="/authentication/login">Sign in</Link>
                     </div>
                     
                     {/* <form onSubmit={doSignup}>
@@ -92,7 +91,7 @@ export function Signup() {
                     </div> */}
                 </div>
             </Box>
-        </Layout>
+        </div>
        
     );
 }

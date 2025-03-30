@@ -1,0 +1,19 @@
+.profile-root {
+}
+
+.profile-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.profile-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.profile-error {
+  color: red;
+  font-size: 0.9rem;
+}

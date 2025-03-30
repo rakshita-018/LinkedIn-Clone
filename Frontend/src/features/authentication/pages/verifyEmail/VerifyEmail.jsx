@@ -1,10 +1,10 @@
 import { Box } from '../../components/Box/Box'
-import { Layout } from '../../components/layout/Layout'
 import './VerifyEmail.css'
-import { Input } from '../../components/input/Input'
-import { Button } from '../../components/button/Button'
+import { Input } from '../../../../components/input/Input'
+import { Button } from '../../../../components/Button/Button'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuthentication } from '../../contexts/AuthenticationContextProvider'
 
 
 export function VerifyEmail(){
@@ -12,6 +12,7 @@ export function VerifyEmail(){
     const [message, setMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const { user, setUser } = useAuthentication();
     
 
 
@@ -30,10 +31,12 @@ export function VerifyEmail(){
         );
         if(response.ok){
             setErrorMessage("")
+            setUser((prevUser) => ({ ...prevUser, emailVerified: true }));
             navigate("/")
         }
         const {message} = await response.json();
         setErrorMessage(message);
+        
         }catch(e){
             console.log(e);
             setErrorMessage("Something went worng, please try again");
@@ -71,7 +74,7 @@ export function VerifyEmail(){
     };
 
     return(
-        <Layout>
+        <div>
             <Box>
                 <div className="verifyEmail-root">
                     <h1>Verify your Email</h1>
@@ -94,7 +97,7 @@ export function VerifyEmail(){
                     </form>
                 </div>
             </Box>
-        </Layout>
+        </div>
         
     )
 }
@@ -173,4 +176,4 @@ export function VerifyEmail(){
 //             </Box>
 //         </div>
 //     );
-// }
+// } 
