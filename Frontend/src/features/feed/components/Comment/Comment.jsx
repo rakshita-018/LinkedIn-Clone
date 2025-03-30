@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuthentication } from "../../../authentication/contexts/AuthenticationContextProvider";
 import { Input } from "../../../../components/input/Input";
 import { timeAgo } from "../utils/date";
+import { TimeAgo } from "../TimeAgo/TimeAgo";
 
 export function Comment({ comment, deleteComment, editComment }) {
     const navigate = useNavigate();
@@ -33,8 +34,8 @@ export function Comment({ comment, deleteComment, editComment }) {
                   <div className="comment-title">
                     {comment.author.position + " at " + comment.author.company}
                   </div>
-                  {/* <TimeAgo date={comment.creationDate} edited={!!comment.updatedDate} /> */}
-                  {timeAgo (new Date(comment.updatedDate || comment.creationDate))}
+                  <TimeAgo date={comment.creationDate} edited={!!comment.updatedDate} />
+                  {/* {timeAgo (new Date(comment.updatedDate || comment.creationDate))} */}
                 
                 
                 </div>

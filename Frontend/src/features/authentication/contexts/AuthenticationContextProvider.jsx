@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { createContext, useContext , useState} from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
 import { Loader } from "../../../components/loader/Loader";
+import { request } from "../../../utils/api";
 
 
 
@@ -22,39 +23,32 @@ export function AuthenticationContextProvider(){
         location.pathname === "/authentication/request-password-reset";
 
         const login = async (email, password) => {
-            const response = await fetch(import.meta.env.VITE_API_URL + "/api/v1/authentication/login", {
+            await request({
+                endpoint: "/api/v1/authentication/login",
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
                 body: JSON.stringify({ email, password }),
+                onSuccess: ({ token }) => {
+                    localStorage.setItem("token", token);
+                },
+                onFailure: (error) => {
+                    throw new Error(error);
+                },
             });
+        };
         
-            if (response.ok) {
-                const { token } = await response.json();
-                localStorage.setItem("token", token);
-            } else {
-                const { message } = await response.json();
-                throw new Error(message);
-            }
-        };  
-        
+
         const signup = async (email, password) => {
-            const response = await fetch(import.meta.env.VITE_API_URL + "/api/v1/authentication/register", {
+            await request({
+                endpoint: "/api/v1/authentication/register",
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
                 body: JSON.stringify({ email, password }),
+                onSuccess: ({ token }) => {
+                    localStorage.setItem("token", token);
+                },
+                onFailure: (error) => {
+                    throw new Error(error);
+                },
             });
-        
-            if (response.ok) {
-                const { token } = await response.json();
-                localStorage.setItem("token", token);
-            } else {
-                const { message } = await response.json();
-                throw new Error(message);
-            }
         };
         
         const logout = async () => {
@@ -63,22 +57,30 @@ export function AuthenticationContextProvider(){
         }
 
         const fetchUser = async () => {
-            try{
-                const response = await fetch(import.meta.env.VITE_API_URL + "/api/v1/authentication/user", {
-                    headers: {
-                        Authorization : `Bearer ${localStorage.getItem("token")}`,
-                    },
-                });
-                if(!response.ok) {
-                    throw new Error("Authentication failed");
-                }
-                const user = await response.json();
-                setUser(user);
-            }catch(e){
-                console.log(e);
-            }finally{
-                setIsLoading(false);
-            }
+            // try{
+            //     const response = await fetch(import.meta.env.VITE_API_URL + "/api/v1/authentication/user", {
+            //         headers: {
+            //             Authorization : `Bearer ${localStorage.getItem("token")}`,
+            //         },
+            //     });
+            //     if(!response.ok) {
+            //         throw new Error("Authentication failed");
+            //     }
+            //     const user = await response.json();
+            //     setUser(user);
+            // }catch(e){
+            //     console.log(e);
+            // }finally{
+            //     setIsLoading(false);
+            // }
+            await request({
+                endpoint: "/api/v1/authentication/user",
+                onSuccess: (data) => setUser(data),
+                onFailure: (error) => {
+                  console.log(error);
+                },
+              });
+              setIsLoading(false);
         }
 
         useEffect(() => {

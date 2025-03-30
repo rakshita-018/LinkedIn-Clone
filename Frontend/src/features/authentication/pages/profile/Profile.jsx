@@ -5,6 +5,7 @@ import { Box } from "../../components/Box/Box";
 import { Input } from "../../../../components/input/Input";
 import { Button } from "../../../../components/Button/Button";
 import { useAuthentication } from "../../contexts/AuthenticationContextProvider";
+import { request } from "../../../../utils/api";
 
 export function Profile() {
   const [step, setStep] = useState(0);
@@ -33,33 +34,17 @@ export function Profile() {
       return;
     }
 
-    try{
-        const res = await fetch ( `${import.meta.env.VITE_API_URL}/api/v1/authentication/profile/${user?.id}?firstName=${data.firstName}
-            &lastName=${data.lastName}&company=${data.company}&position=${data.position}&location=${data.location}`,
-            {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                }
-            },
-        );
+    await request({
+      endpoint: `/api/v1/authentication/profile/${user?.id}/info?firstName=${data.firstName}&lastName=${data.lastName}&company=${data.company}&position=${data.position}&location=${data.location}`,
+      method: "PUT",
+      body: JSON.stringify(data),
+      onSuccess: (data) => {
+        setUser(data);
+        navigate("/");
+      },
+      onFailure: (error) => setError(error),
+    });
 
-        if(res.ok){
-            const updatedUser = await res.json();
-            setUser(updatedUser);
-        }else{
-            const {message} = res.json();
-            throw new Error(message);
-        }
-    }catch(error){
-        if(error instanceof Error){
-            setError(error.message)
-        }else{
-            setError("unknown error occured.")
-        }
-    }finally{
-        navigate("/")
-    }
   };
 
   return (

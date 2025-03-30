@@ -13,64 +13,76 @@ export function VerifyEmail(){
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const { user, setUser } = useAuthentication();
-    
 
+//     usePageTitle("Verify Email");
 
     const validateEmail = async (code) => {
-    setMessage("");
-    setIsLoading(true);
-    try{
-        const response = await fetch(
-            `${ import.meta.env.VITE_API_URL}/api/v1/authentication/validate-email-verification-token?token=${code}`,               
-            {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            }
-        );
-        if(response.ok){
-            setErrorMessage("")
-            setUser((prevUser) => ({ ...prevUser, emailVerified: true }));
-            navigate("/")
-        }
-        const {message} = await response.json();
-        setErrorMessage(message);
-        
-        }catch(e){
-            console.log(e);
-            setErrorMessage("Something went worng, please try again");
-        }finally{
-            setIsLoading(false)          
-        }
+        setMessage("");
+        setIsLoading(true);
+
+        await request({
+            endpoint: `/api/v1/authentication/validate-email-verification-token?token=${code}`,
+            method: "PUT",
+            onSuccess: () => {
+                setErrorMessage("");
+                setUser((prevUser) => ({ ...prevUser, emailVerified: true }));
+                navigate("/");
+            },
+            onFailure: (error) => {
+                setErrorMessage(error);
+            },
+        });
+
+        setIsLoading(false);
     };
 
-    const sendEmailVerificationToken = async (code) => {
-    setMessage("");
-    setIsLoading(true);
-    try{
-        const response = await fetch(
-            `${ import.meta.env.VITE_API_URL}/api/v1/authentication/send-email-verification-token`,               
-            {
-                method: "GET",
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            }
-        );
-        if(response.ok){
-            setErrorMessage("")
-            setMessage("Code sent successfully. Please check your email.")
-        }
-        const {message} = await response.json();
-        setErrorMessage(message);
-        }catch(e){
-            console.log(e);
-            setErrorMessage("Something went worng, please try again");
-        }finally{
-            setIsLoading(false)
-            setErrorMessage("")
-        }
+    // const validateEmail = async (code) => {
+    // setMessage("");
+    // setIsLoading(true);
+    // try{
+    //     const response = await fetch(
+    //         `${ import.meta.env.VITE_API_URL}/api/v1/authentication/validate-email-verification-token?token=${code}`,               
+    //         {
+    //             method: "PUT",
+    //             headers: {
+    //                 Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //             },
+    //         }
+    //     );
+    //     if(response.ok){
+    //         setErrorMessage("")
+    //         setUser((prevUser) => ({ ...prevUser, emailVerified: true }));
+    //         navigate("/")
+    //     }
+    //     const {message} = await response.json();
+    //     setErrorMessage(message);
+        
+    //     }catch(e){
+    //         console.log(e);
+    //         setErrorMessage("Something went worng, please try again");
+    //     }finally{
+    //         setIsLoading(false)          
+    //     }
+    // };
+
+    const sendEmailVerificationToken = async () => {
+        setErrorMessage("");
+        setIsLoading(true);
+
+        await request({
+            endpoint: `/api/v1/authentication/send-email-verification-token`,
+
+            onSuccess: () => {
+                setErrorMessage("");
+                setMessage("Code sent successfully. Please check your email.");
+            },
+            onFailure: (error) => {
+                setErrorMessage(error);
+            },
+        });
+
+        setIsLoading(false);
+        setErrorMessage("")
     };
 
     return(
@@ -103,52 +115,10 @@ export function VerifyEmail(){
 }
 
 
-// export function VerifyEmail() {
-//     const [errorMessage, setErrorMessage] = useState("");
-//     const { user, setUser } = useAuthentication();
-//     const [message, setMessage] = useState("");
-//     const [isLoading, setIsLoading] = useState(false);
-//     const navigate = useNavigate();
 
-//     usePageTitle("Verify Email");
 
-//     const validateEmail = async (code) => {
-//         setMessage("");
-//         setIsLoading(true);
 
-//         await request({
-//             endpoint: `/api/v1/authentication/validate-email-verification-token?token=${code}`,
-//             method: "PUT",
-//             onSuccess: () => {
-//                 setErrorMessage("");
-//                 setUser({ ...user, emailVerified: true });
-//                 navigate("/");
-//             },
-//             onFailure: (error) => {
-//                 setErrorMessage(error);
-//             },
-//         });
 
-//         setIsLoading(false);
-//     };
-
-//     const sendEmailVerificationToken = async () => {
-//         setErrorMessage("");
-//         setIsLoading(true);
-
-//         await request({
-//             endpoint: `/api/v1/authentication/send-email-verification-token`,
-//             onSuccess: () => {
-//                 setErrorMessage("");
-//                 setMessage("Code sent successfully. Please check your email.");
-//             },
-//             onFailure: (error) => {
-//                 setErrorMessage(error);
-//             },
-//         });
-
-//         setIsLoading(false);
-//     };
 
 //     return (
 //         <div className="root">
