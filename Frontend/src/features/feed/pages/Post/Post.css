@@ -1,0 +1,22 @@
+.notePost-root {
+    display: grid;
+    gap: 2rem;
+  }
+  
+  .notePost-left,
+  .notePost-right {
+    display: none;
+  }
+  
+  @media screen and (min-width: 1135px) {
+    .notePost-root {
+      grid-template-columns: 14rem 1fr 20rem;
+      align-items: flex-start;
+    }
+  
+    .notePost-left,
+    .notePost-right {
+      display: block;
+    }
+  }
+  

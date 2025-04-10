@@ -7,6 +7,8 @@ import { timeAgo } from "../utils/date";
 import { Comment } from "../Comment/comment";
 import { Modal } from "../Modal/Modal";
 import { TimeAgo } from "../TimeAgo/TimeAgo";
+import { useWebSocket } from "../../../ws/Ws";
+import { request } from "../../../../utils/api";
 
 export function Post({ post, setPosts }) {
     const [comments, setComments] = useState([]);
@@ -17,7 +19,7 @@ export function Post({ post, setPosts }) {
     const { user } = useAuthentication();
     const [showMenu, setShowMenu] = useState(false);
     const [editing, setEditing] = useState(false);
-    // const webSocketClient = useWebSocket();
+    const webSocketClient = useWebSocket();
     const [postLiked, setPostLiked] = useState(undefined);
     // const [postLiked, setPostLiked] = useState(!!post.likes?.some((like) => like.id === user?.id));
 
@@ -50,6 +52,36 @@ export function Post({ post, setPosts }) {
     }, [post.id]);
 
     useEffect(() => {
+      const subscription = webSocketClient?.subscribe(`/topic/likes/${post.id}`, (message) => {
+        const likes = JSON.parse(message.body);
+        setLikes(likes);
+        setPostLiked(likes.some((like) => like.id === user?.id));
+      });
+      return () => subscription?.unsubscribe();
+    }, [post.id, user?.id, webSocketClient]);
+    
+    useEffect(() => {
+      const subscription = webSocketClient?.subscribe(
+        `/topic/comments/${post.id}`,
+        (message) => {
+          const comment = JSON.parse(message.body);
+          setComments((prev) => {
+            const index = prev.findIndex((c) => c.id === comment.id);
+            if (index === -1) {
+              return [comment, ...prev];
+            }
+            return prev.map((c) => (c.id === comment.id ? comment : c));
+          });
+        }
+      );
+    
+      return () => {
+        subscription?.unsubscribe();
+      };
+    }, [post.id, webSocketClient]);
+    
+
+    useEffect(() => {
       if(!post) return;
       const fetchLikes = async () => {
         try {
@@ -66,7 +98,7 @@ export function Post({ post, setPosts }) {
 
           const likesData = await response.json();
           setLikes(likesData);
-          setPostLiked(!!likesData.some((like) => like.id === user?.id)); 
+          setPostLiked(likesData.some((like) => like.id === user?.id)); 
 
         }catch (e) {
           console.error("couldn't fetch likes", e);
@@ -75,61 +107,46 @@ export function Post({ post, setPosts }) {
       fetchLikes();
     },[post.id, user?.id]);
        
-    useEffect(() => {
-      if (!post) return;
-      const fetchPostData = async () => {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
+    // const like = async () => {
+    //   // const newLikedState = !postLiked;
+    //   // setPostLiked(newLikedState);
     
-          if (!response.ok) {
-            const { message } = await response.json();
-            throw new Error(message);
-          }
+    //   try {
+    //     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
+    //       method: "PUT",
+    //       headers: {
+    //         Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //       },
+    //     });
     
-          const postData = await response.json();
-          setLikes(postData.likes || []);
-        } catch (error) {
-          console.error("Error fetching post details:", error);
-        }
-      };
+    //     if (!response.ok) {
+    //       const { message } = await response.json();
+    //       throw new Error(message);
+    //     }
     
-      fetchPostData();
-    }, [post.id, postLiked]);
-
+    //     // // Update likes array manually to avoid extra API call
+    //     // setLikes((prevLikes) => 
+    //     //   newLikedState 
+    //     //     ? [...prevLikes, { id: user.id }]  // Add like
+    //     //     : prevLikes.filter((like) => like.id !== user.id) // Remove like
+    //     // );
+    
+    //   } catch (error) {
+    //     console.error("Error liking post:", error instanceof Error ? error.message : "Error occurred, try again");
+    //     // setPostLiked(!newLikedState); // Revert UI on failure
+    //   }
+    // };
+   
     const like = async () => {
-      const newLikedState = !postLiked;
-      setPostLiked(newLikedState);
-    
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-    
-        if (!response.ok) {
-          const { message } = await response.json();
-          throw new Error(message);
-        }
-    
-        // Update likes array manually to avoid extra API call
-        setLikes((prevLikes) => 
-          newLikedState 
-            ? [...prevLikes, { id: user.id }]  // Add like
-            : prevLikes.filter((like) => like.id !== user.id) // Remove like
-        );
-    
-      } catch (error) {
-        console.error("Error liking post:", error instanceof Error ? error.message : "Error occurred, try again");
-        setPostLiked(!newLikedState); // Revert UI on failure
-      }
+      await request({
+        endpoint: `/api/v1/feed/posts/${post.id}/likes`,
+        method: "PUT",
+        onSuccess: () => { },
+        onFailure: (error) => {
+          console.error(error);
+        },
+      });
     };
-    
 
     const deletePost = async (id) => {
       try {
@@ -204,38 +221,54 @@ export function Post({ post, setPosts }) {
       }
     };
 
-    const postComment = async(e) =>{
+    // const postComment = async(e) =>{
+    //   e.preventDefault();
+    //   if(!content){
+    //     return;
+    //   }
+    //   try {
+    //     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/comments`, {
+    //       method: "POST",
+    //       headers: {
+    //         Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({ content }),
+    //     });
+
+    //     if(!res.ok){
+    //       const { message } = await res.json();
+    //       throw new Error(message);
+    //     }
+    //     const data = await res.json();
+
+    //     setComments((prev) => [data, ...prev]);
+    //     setContent("");
+    //   }catch(e){
+    //     if(error instanceof Error){
+    //       console.error(error.message);
+    //     }else{
+    //       console.error("An error occurred while posting a comment:", e);
+    //     }
+    //   }
+    // };
+    
+    const postComment = async (e) => {
       e.preventDefault();
-      if(!content){
+      if (!content) {
         return;
       }
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/comments`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ content }),
-        });
-
-        if(!res.ok){
-          const { message } = await res.json();
-          throw new Error(message);
-        }
-        const data = await res.json();
-
-        setComments((prev) => [data, ...prev]);
-        setContent("");
-      }catch(e){
-        if(error instanceof Error){
-          console.error(error.message);
-        }else{
-          console.error("An error occurred while posting a comment:", e);
-        }
-      }
+      await request({
+        endpoint: `/api/v1/feed/posts/${post.id}/comments`,
+        method: "POST",
+        body: JSON.stringify({ content }),
+        onSuccess: () => setContent(""),
+        onFailure: (error) => {
+          console.error(error);
+        },
+      });
     };
-    
+
     const editPost = async(content, picture) => {
       try{
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}`, {
@@ -303,7 +336,6 @@ export function Post({ post, setPosts }) {
                 edited={!!post.updatedDate}
                 className="post-date"
               />
-              {/* {timeAgo (new Date(post.updatedDate || post.creationDate))} */}
               {post.updatedDate? ". Edited" : ""}
             </div>
           </div>
@@ -441,61 +473,87 @@ export function Post({ post, setPosts }) {
 //       }
 //     };
     
-//     // const like = async () => {
-//     //   setPostLiked((prev) => !prev);
-//     //   try{
-//     //     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
-//     //       method: "PUT",
-//     //       headers: {
-//     //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//     //       },
-//     //     });
+// const like = async () => {
+//   setPostLiked((prev) => !prev);
+//   try{
+//     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
+//       method: "PUT",
+//       headers: {
+//         Authorization: `Bearer ${localStorage.getItem("token")}`,
+//       },
+//     });
 
-//     //     if (!response.ok) {
-//     //       const { message } = await response.json();
-//     //       throw new Error(message);
-//     //     }
-//     //     fetchLikes();
-//     //   }catch(e){
-//     //       if( error instanceof Error ){
-//     //         console.error("Error liking post:", error.message);
-//     //       }else{
-//     //         console.error("Error occured try again");
-//     //       }
-//     //       setPostLiked((prev) => !prev);
-//     //   }
-//     // }
+//     if (!response.ok) {
+//       const { message } = await response.json();
+//       throw new Error(message);
+//     }
+//     fetchLikes();
+//   }catch(e){
+//       if( error instanceof Error ){
+//         console.error("Error liking post:", error.message);
+//       }else{
+//         console.error("Error occured try again");
+//       }
+//       setPostLiked((prev) => !prev);
+//   }
+// }
 
-//     // const like = async () => {
-//     //   const newLikedState = !postLiked;
-//     //   setPostLiked(newLikedState);
+// const like = async () => {
+//   const newLikedState = !postLiked;
+//   setPostLiked(newLikedState);
+
+//   try {
+//     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
+//       method: "PUT",
+//       headers: {
+//         Authorization: `Bearer ${localStorage.getItem("token")}`,
+//       },
+//     });
+
+//     if (!response.ok) {
+//       const { message } = await response.json();
+//       throw new Error(message);
+//     }
+
+//     // Fetch latest likes from server
+//     const updatedLikesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}`);
+//     if (!updatedLikesResponse.ok) {
+//       throw new Error("Failed to fetch updated post data");
+//     }
+
+//     const postData = await updatedLikesResponse.json();
+//     setLikes(postData.likes || []);
+
+//     // Ensure postLiked is correctly updated
+//     setPostLiked(postData.likes.some((like) => like.id === user?.id));
+//   } catch (error) {
+//     console.error("Error liking post:", error);
+//     setPostLiked(!newLikedState); // Revert on failure
+//   }
+// };
+
+ // useEffect(() => {
+    //   if (!post) return;
+    //   const fetchPostData = async () => {
+    //     try {
+    //       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}`, {
+    //         headers: {
+    //           Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //         },
+    //       });
     
-//     //   try {
-//     //     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
-//     //       method: "PUT",
-//     //       headers: {
-//     //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//     //       },
-//     //     });
+    //       if (!response.ok) {
+    //         const { message } = await response.json();
+    //         throw new Error(message);
+    //       }
     
-//     //     if (!response.ok) {
-//     //       const { message } = await response.json();
-//     //       throw new Error(message);
-//     //     }
+    //       const postData = await response.json();
+    //       setLikes(postData.likes || []);
+    //     } catch (error) {
+    //       console.error("Error fetching post details:", error);
+    //     }
+    //   };
     
-//     //     // Fetch latest likes from server
-//     //     const updatedLikesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}`);
-//     //     if (!updatedLikesResponse.ok) {
-//     //       throw new Error("Failed to fetch updated post data");
-//     //     }
-    
-//     //     const postData = await updatedLikesResponse.json();
-//     //     setLikes(postData.likes || []);
-    
-//     //     // Ensure postLiked is correctly updated
-//     //     setPostLiked(postData.likes.some((like) => like.id === user?.id));
-//     //   } catch (error) {
-//     //     console.error("Error liking post:", error);
-//     //     setPostLiked(!newLikedState); // Revert on failure
-//     //   }
-//     // };
+    //   fetchPostData();
+    // }, [post.id, postLiked]);
+

@@ -1,0 +1,50 @@
+.notification-root {
+    display: grid;
+    gap: 2rem;
+}
+  
+.notification-root .notification-left,
+.notification-root .notification-right {
+    display: none;
+}
+
+.notification-root .notification-center {
+    background-color: white;
+    border-radius: 0.3rem;
+    border: 1px solid #e0e0e0;
+}
+
+.notification-root .notification-notification {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    width: 100%;
+}
+
+.notification-root .notification-notification:not(:last-child) {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.notification-root .notification-notification.notification-unread {
+    background-color: #f0f0f0;
+}
+
+.notification-root .notification-notification .notification-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+@media screen and (width >= 1135px) {
+    .notification-root {
+    grid-template-columns: 14rem 1fr 20rem;
+    align-items: flex-start;
+    }
+
+    .notification-root .notification-left,
+    .notification-root .notification-right {
+    display: block;
+    }
+}
