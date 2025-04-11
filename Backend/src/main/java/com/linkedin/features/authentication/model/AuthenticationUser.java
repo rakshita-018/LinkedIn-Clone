@@ -2,6 +2,7 @@ package com.linkedIn.features.authentication.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.linkedIn.features.feed.model.Post;
+import com.linkedIn.features.messaging.model.Conversation;
 import com.linkedIn.features.notifications.model.Notification;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -18,7 +19,7 @@ public class AuthenticationUser {
     private Long id;
     @NotNull
     @Email
-//    @Column(unique = true)
+    @Column(unique = true)
     private String email;
     private Boolean emailVerified = false;
     private String emailVerificationToken = null;
@@ -46,6 +47,22 @@ public class AuthenticationUser {
     @JsonIgnore
     @OneToMany(mappedBy = "actor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> actedNotifications;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Conversation> conversationsAsAuthor;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Conversation> conversationsAsRecipient;
+
+//    @JsonIgnore
+//    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Connection> initiatedConnections;
+//
+//    @JsonIgnore
+//    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Connection> receivedConnections;
 
     public AuthenticationUser(String email, String password) {
         this.email = email;
@@ -190,5 +207,21 @@ public class AuthenticationUser {
 
     public void setActedNotifications(List<Notification> actedNotifications) {
         this.actedNotifications = actedNotifications;
+    }
+
+    public List<Conversation> getConversationsAsAuthor() {
+        return conversationsAsAuthor;
+    }
+
+    public void setConversationsAsAuthor(List<Conversation> conversationsAsAuthor) {
+        this.conversationsAsAuthor = conversationsAsAuthor;
+    }
+
+    public List<Conversation> getConversationsAsRecipient() {
+        return conversationsAsRecipient;
+    }
+
+    public void setConversationsAsRecipient(List<Conversation> conversationsAsRecipient) {
+        this.conversationsAsRecipient = conversationsAsRecipient;
     }
 }

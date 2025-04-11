@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/authentication")
@@ -83,5 +84,10 @@ public class AuthenticationController {
 
         return authenticationService.updateUserProfile(id, firstName, lastName, company, position, location);
 
+    }
+
+    @GetMapping("/users")
+    public List<AuthenticationUser> getUsersWithoutAuthenticated(@RequestAttribute("authenticatedUser") AuthenticationUser user){
+        return authenticationService.getUsersWithoutAuthenticated(user);
     }
 }

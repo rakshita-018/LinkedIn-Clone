@@ -3,6 +3,8 @@ package com.linkedIn.features.notifications.service;
 import com.linkedIn.features.authentication.model.AuthenticationUser;
 import com.linkedIn.features.feed.model.Comment;
 import com.linkedIn.features.feed.model.Post;
+import com.linkedIn.features.messaging.model.Conversation;
+import com.linkedIn.features.messaging.model.Message;
 import com.linkedIn.features.notifications.model.Notification;
 import com.linkedIn.features.notifications.model.NotificationType;
 import com.linkedIn.features.notifications.repository.NotificationRepository;
@@ -98,15 +100,16 @@ public class NotificationService {
 //        }
 //    }
 
-//    public void sendConversationToUsers(Long senderId, Long receiverId, Conversation conversation) {
-//        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/conversations", conversation);
-//        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/conversations", conversation);
-//    }
-//
-//    public void sendMessageToConversation(Long conversationId, Message message) {
-//        messagingTemplate.convertAndSend("/topic/conversations/" + conversationId + "/messages", message);
-//    }
-//
+    public void sendConversationToUsers(Long senderId, Long receiverId, Conversation conversation) {
+        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/conversations", conversation);
+        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/conversations", conversation);
+    }
+
+
+    public void sendMessageToConversation(Long conversationId, Message message) {
+        messagingTemplate.convertAndSend("/topic/conversations/" + conversationId + "/messages", message);
+    }
+
 //    public void sendNewInvitationToUsers(Long senderId, Long receiverId, Connection connection) {
 //        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/connections/new", connection);
 //        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/connections/new", connection);

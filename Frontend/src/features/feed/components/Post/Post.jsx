@@ -336,7 +336,7 @@ export function Post({ post, setPosts }) {
                 edited={!!post.updatedDate}
                 className="post-date"
               />
-              {post.updatedDate? ". Edited" : ""}
+              {/* {post.updatedDate? ". Edited" : ""} */}
             </div>
           </div>
           <div>

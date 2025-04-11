@@ -34,7 +34,7 @@ public class AuthenticationFilter extends HttpFilter {
     @Override
     protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5174"); // must match frontend
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173"); // must match frontend
 //        response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true"); // required for cookies/headers
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
