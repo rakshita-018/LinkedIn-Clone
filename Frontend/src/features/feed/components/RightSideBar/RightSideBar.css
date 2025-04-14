@@ -8,6 +8,7 @@
   .rightSidebar-heading {
     font-weight: bold;
     margin-bottom: 0.5rem;
+    font-size: 0.8rem;
   }
   
   .rightSidebar-items {
@@ -18,7 +19,7 @@
   .rightSidebar-item {
     display: flex;
     gap: 1rem;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
   }
   
   .rightSidebar-item button {
@@ -40,13 +41,14 @@
     text-align: left;
   }
   
-  .rightSidebar-button {
+  .rightSidebar-button{
     width: auto;
-    margin: 0.3rem 0 0;
+    margin: 0.8rem 0 0;
   }
   
   .rightSidebar-empty {
     text-align: center;
     font-style: italic;
+    font-size: 0.8rem;
   }
   

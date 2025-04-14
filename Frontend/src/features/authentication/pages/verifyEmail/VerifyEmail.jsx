@@ -98,6 +98,7 @@ export function VerifyEmail(){
                             const code = e.target.code.value;
                             await validateEmail(code);
                             setIsLoading(false);
+                            // setMessage("")
                         }}
                     >
                         <p>Only one step left to complete your registration. Verify your email address.</p>

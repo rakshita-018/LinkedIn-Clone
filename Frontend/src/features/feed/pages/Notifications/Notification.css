@@ -12,6 +12,7 @@
     background-color: white;
     border-radius: 0.3rem;
     border: 1px solid #e0e0e0;
+    font-size: 0.8rem;
 }
 
 .notification-root .notification-notification {
@@ -32,8 +33,8 @@
 }
 
 .notification-root .notification-notification .notification-avatar {
-    width: 40px;
-    height: 40px;
+    width: 3.8rem;
+    height: 3.8rem;
     border-radius: 50%;
 }
 

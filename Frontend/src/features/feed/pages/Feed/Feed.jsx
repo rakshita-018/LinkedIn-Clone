@@ -7,6 +7,7 @@ import { useAuthentication } from '../../../authentication/contexts/Authenticati
 import { useEffect, useState } from "react";
 import { Post } from '../../components/Post/Post';
 import { Modal } from '../../components/Modal/Modal';
+import { usePageTitle } from '../../../../hooks/usePageTitle';
 
  export function Feed(){
     const navigate = useNavigate();
@@ -15,7 +16,7 @@ import { Modal } from '../../components/Modal/Modal';
     const [posts, setPosts] = useState([]);
     const [feedContent, setFeedContent] = useState("connections");
     const [error, setError] = useState("");
-
+    usePageTitle("Feed")
     useEffect(() => {
         const fetchPosts = async () => {
           try {

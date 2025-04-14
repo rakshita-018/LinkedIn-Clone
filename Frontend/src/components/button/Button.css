@@ -24,12 +24,12 @@
 
 .button-root.medium {
     padding: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 .button-root.small {
     padding: 0.4rem;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
 }
 /* Disabled state */
 .button-root:disabled {

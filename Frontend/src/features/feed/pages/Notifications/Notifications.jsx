@@ -5,6 +5,7 @@ import { useAuthentication } from "../../../authentication/contexts/Authenticati
 import { TimeAgo } from "../../components/TimeAgo/TimeAgo";
 import { LeftSideBar } from "../../components/LeftSideBar/LeftSideBar";
 import { RightSidebar } from "../../components/RightSideBar/RightSideBar";
+import { usePageTitle } from "../../../../hooks/usePageTitle"
 
 import './Notification.css'
 
@@ -17,6 +18,7 @@ export function Notifications() {
 
   const [notifications, setNotifications] = useState([]);
   const { user } = useAuthentication();
+  usePageTitle("Notification")
 
   useEffect(() => {
     const fetchNotifications = async () => {

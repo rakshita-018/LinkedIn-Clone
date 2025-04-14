@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Header.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { Input } from "../input/Input";
 import { useAuthentication } from "../../features/authentication/contexts/AuthenticationContextProvider";
 import { Profile } from "./components/profile/Profile";
@@ -15,10 +15,28 @@ export function Header(){
     const [showNavigationMenu, setShowNavigationMenu] = useState(
       window.innerWidth > 1080 ? true : false
     );
+    const [conversations, setConversations] = useState([]);
     const [notifications, setNotifications] = useState([]);
     const nonReadNotificationCount = notifications.filter(
       (notification) => !notification.read
     ).length;
+    const location = useLocation();
+    const nonReadMessagesCount = conversations.reduce((acc, conversation) => {
+      const unreadMessages = conversation.messages?.filter(
+        (message) => message.sender.id !== user?.id && !message.isRead
+      ) || [];
+      return acc + unreadMessages.length;
+    }, 0);
+    const [invitations, setInvitations] = useState([]);
+
+    useEffect(() => {
+      const handleResize = () => {
+        setShowNavigationMenu(window.innerWidth > 1080);
+      };
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
 
     useEffect(() => {
         const handleResize = () => {
@@ -54,7 +72,90 @@ export function Header(){
       return () => subscribtion?.unsubscribe();
     }, [user?.id, webSocketClient]);
 
+    useEffect(() => {
+      request({
+        endpoint: "/api/v1/messaging/conversations",
+        onSuccess: setConversations,
+        onFailure: (error) => console.log(error),
+      });
+    }, []);
+
+    useEffect(() => {
+      const subscribtion = webSocketClient?.subscribe(
+        `/topic/users/${user?.id}/conversations`,
+        (message) => {
+          const conversation = JSON.parse(message.body);
+          setConversations((prev) => {
+            const index = prev.findIndex((c) => c.id === conversation.id);
+            if (index === -1) {
+              if(conversation.author.id === user?.id) return prev;
+              return [conversation, ...prev];
+            }
+            return prev.map((c) => (c.id === conversation.id ? conversation : c));
+          });
+        }
+      );
+      return () => subscribtion?.unsubscribe();
+    }, [user?.id, webSocketClient]);
+
     
+    useEffect(() => {
+      request({
+        endpoint: "/api/v1/networking/connections?status=PENDING",
+        onSuccess: (data) =>
+          setInvitations(data.filter((c) => !c.seen && c.recipient.id === user?.id)),
+        onFailure: (error) => console.log(error),
+      });
+    }, [user?.id]);
+
+    useEffect(() => {
+      const subscription = webSocketClient?.subscribe(
+        "/topic/users/" + user?.id + "/connections/new",
+        (data) => {
+          const connection = JSON.parse(data.body);
+          setInvitations((connections) =>
+            connection.recipient.id === user?.id ? [connection, ...connections] : connections
+          );
+        }
+      );
+      return () => subscription?.unsubscribe();
+    }, [user?.id, webSocketClient]);
+    useEffect(() => {
+    const subscription = webSocketClient?.subscribe(
+      "/topic/users/" + user?.id + "/connections/accepted",
+      (data) => {
+        const connection = JSON.parse(data.body);
+        setInvitations((invitations) => invitations.filter((c) => c.id !== connection.id));
+      }
+    );
+
+    return () => subscription?.unsubscribe();
+  }, [user?.id, webSocketClient]);
+
+  useEffect(() => {
+    const subscription = webSocketClient?.subscribe(
+      "/topic/users/" + user?.id + "/connections/remove",
+      (data) => {
+        const connection = JSON.parse(data.body);
+        setInvitations((invitations) => invitations.filter((c) => c.id !== connection.id));
+      }
+    );
+
+    return () => subscription?.unsubscribe();
+  }, [user?.id, webSocketClient]);
+
+  useEffect(() => {
+    const subscription = webSocketClient?.subscribe(
+      "/topic/users/" + user?.id + "/connections/seen",
+      (data) => {
+        const connection = JSON.parse(data.body);
+        setInvitations((invitations) => invitations.filter((c) => c.id !== connection.id));
+      }
+    );
+
+    return () => subscription?.unsubscribe();
+  }, [user?.id, webSocketClient]);
+  
     return (
         <header className="header-root">
             <div className="container">
@@ -120,9 +221,9 @@ export function Header(){
                         <path d="M12 16v6H3v-6a3 3 0 013-3h3a3 3 0 013 3zm5.5-3A3.5 3.5 0 1014 9.5a3.5 3.5 0 003.5 3.5zm1 2h-2a2.5 2.5 0 00-2.5 2.5V22h7v-4.5a2.5 2.5 0 00-2.5-2.5zM7.5 2A4.5 4.5 0 1012 6.5 4.49 4.49 0 007.5 2z"></path>
                       </svg>
                       <div>
-                        {/* {invitations.length > 0 && !location.pathname.includes("network") ? (
+                        {invitations.length > 0 && !location.pathname.includes("network") ? (
                           <span className="badge">{invitations.length}</span>
-                        ) : null} */}
+                        ) : null}
                         <span>Network</span>
                       </div>
                     </NavLink>
@@ -147,9 +248,9 @@ export function Header(){
                         <path d="M16 4H8a7 7 0 000 14h4v4l8.16-5.39A6.78 6.78 0 0023 11a7 7 0 00-7-7zm-8 8.25A1.25 1.25 0 119.25 11 1.25 1.25 0 018 12.25zm4 0A1.25 1.25 0 1113.25 11 1.25 1.25 0 0112 12.25zm4 0A1.25 1.25 0 1117.25 11 1.25 1.25 0 0116 12.25z"></path>
                       </svg>
                       <div>
-                        {/* {nonReadMessagesCount > 0 && !location.pathname.includes("messaging") ? (
+                        {nonReadMessagesCount > 0 && !location.pathname.includes("messaging") ? (
                           <span className="badge">{nonReadMessagesCount}</span>
-                        ) : null} */}
+                        ) : null}
                         <span>Messaging</span>
                       </div>
                     </NavLink>

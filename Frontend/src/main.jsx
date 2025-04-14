@@ -10,9 +10,17 @@ import {VerifyEmail} from './features/authentication/pages/verifyEmail/VerifyEma
 import { AuthenticationContextProvider } from './features/authentication/contexts/AuthenticationContextProvider'
 import { AuthenticationLayout } from './features/authentication/components/authenticationLayout/AuthenticationLayout'
 import { ApplicationLayout } from './components/applicationLayout/ApplicationLayout'
-import { Profile } from './features/authentication/pages/profile/Profile'
+import { Profile as LoginProfile} from './features/authentication/pages/profile/Profile'
 import { Notifications } from './features/feed/pages/Notifications/Notifications'
 import { PostPage } from './features/feed/pages/Post/Post'
+import { Messaging } from './features/messaging/pages/Messages/Messaging'
+import { Conversation } from './features/messaging/pages/Conversations/Conversation'
+import { Network } from './features/networking/pages/Network/Network'
+import { Invitations } from './features/networking/pages/Invitations/Invitations'
+import { Connections } from './features/networking/pages/Connections/Connections'
+import { Posts } from './features/profile/pages/Posts/Posts'
+import { Profile } from './features/profile/pages/Profile/Profile'
+
 
 const router = createBrowserRouter([
 
@@ -33,15 +41,31 @@ const router = createBrowserRouter([
           },
           {
             path: "network",
-            element: <div>Network</div>
-          },
-          {
-            path: "job",
-            element: <div>Job</div>
+            element: <Network/>,
+            children: [
+              {
+                index: true,
+                element: <Navigate to="invitations"/>
+              },
+              {
+                path: "invitations",
+                element: <Invitations/>
+              },
+              {
+                path: "connections",
+                element: <Connections />
+              }
+            ]
           },
           {
             path: "messaging",
-            element: <div>Messaging</div>
+            element: <Messaging/>,
+            children: [
+              {
+                path: "conversations/:id",
+                element: <Conversation/>
+              }
+            ]
           },
           {
             path: "notifications",
@@ -49,11 +73,11 @@ const router = createBrowserRouter([
           },
           {
             path: "profile/:id",
-            element: <div>Profile</div>
+            element: <Profile />,
           },
           {
-            path: "settings",
-            element: <div>Settings & Privacy</div>
+            path: "profile/:id/posts",
+            element: <Posts />,
           },
         ]
       },
@@ -79,7 +103,7 @@ const router = createBrowserRouter([
         },
         {
           path: 'profile/:id',
-          element: <Profile/>,
+          element: <LoginProfile/>,
         }
         ]
       },

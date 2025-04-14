@@ -1,9 +1,11 @@
 import { Box } from '../../components/Box/Box'
 import './ResetPassword.css'
 import { Input } from '../../../../components/input/Input'
-import { Button } from '../../../../components/button/Button'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePageTitle } from '../../../../hooks/usePageTitle'
+import { Button } from '../../../../components/Button/Button'
+
 
 export function ResetPassword(){
     const [emailSent, setEmailSent] = useState(false);
@@ -12,7 +14,7 @@ export function ResetPassword(){
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     
-// usePageTitle("Reset Password");
+    usePageTitle("Reset Password");
 
     const sendPasswordResetToken = async (email) => {
         setIsLoading(true);

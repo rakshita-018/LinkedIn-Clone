@@ -20,15 +20,16 @@
   background-color: white;
   border-radius: 0.3rem;
   border: 1px solid #e0e0e0;
-  padding: 1rem;
+  padding: 0.6rem;
   display: grid;
   grid-template-columns: 5rem 1fr;
   gap: 1rem;
+  font-size: 0.8rem;
 }
 
 .feed-posting .feed-avatar {
-  width: 4rem;
-  height: 4rem;
+  width: 3.8rem;
+  height: 3.8rem;
   border-radius: 50%;
   object-fit: cover;
 }
@@ -50,7 +51,7 @@
   padding: 0.5rem 1rem;
   gap: 5rem;
   border: none;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s ease;
 }
@@ -71,7 +72,7 @@
 
 @media screen and (width >= 1135px) {
   .feed-root {
-    grid-template-columns: 14rem 1fr 20rem;
+    grid-template-columns: 14rem 1fr 16rem;
     align-items: flex-start;
   }
 

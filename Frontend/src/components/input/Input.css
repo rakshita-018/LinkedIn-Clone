@@ -10,12 +10,13 @@
 }
   
 .input-root.large input {
-    padding: 1rem;
+    padding: 0.7rem;
+    font-size: 0.9rem;
 }
 
 .input-root.medium input {
     padding: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 .input-root.small input {

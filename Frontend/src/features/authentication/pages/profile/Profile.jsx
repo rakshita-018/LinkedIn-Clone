@@ -6,6 +6,7 @@ import { Input } from "../../../../components/input/Input";
 import { Button } from "../../../../components/Button/Button";
 import { useAuthentication } from "../../contexts/AuthenticationContextProvider";
 import { request } from "../../../../utils/api";
+import { usePageTitle } from "../../../../hooks/usePageTitle";
 
 export function Profile() {
   const [step, setStep] = useState(0);
@@ -19,6 +20,8 @@ export function Profile() {
     position: user?.position || "",
     location: user?.location || "",
   });
+
+    usePageTitle("Profile");
 
   const onSubmit = async () => {
     if (!data.firstName || !data.lastName) {

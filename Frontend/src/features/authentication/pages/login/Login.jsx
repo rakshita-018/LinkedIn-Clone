@@ -2,12 +2,12 @@ import React from 'react';
 import './Login.css'
 import { Box } from "../../components/Box/Box";
 import { Input } from "../../../../components/input/Input";
-import { Button } from '../../../../components/button/Button';
 import { Seperator } from "../../components/seperator/Seperator";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from 'react';
 import { useAuthentication } from '../../contexts/AuthenticationContextProvider';
-
+import { usePageTitle } from '../../../../hooks/usePageTitle';
+import { Button } from '../../../../components/Button/Button';
 
 export function Login() {
     const [errorMessage, setErrorMessage] = useState("");
@@ -17,7 +17,7 @@ export function Login() {
     const navigate = useNavigate();
     // const { isOauthInProgress, oauthError, startOauth } = useOauth("login");
     
-    // usePageTitle("Login");
+    usePageTitle("Login");
 
     const doLogin = async (e) => {
         e.preventDefault();

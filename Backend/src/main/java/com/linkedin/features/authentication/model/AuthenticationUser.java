@@ -3,6 +3,7 @@ package com.linkedIn.features.authentication.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.linkedIn.features.feed.model.Post;
 import com.linkedIn.features.messaging.model.Conversation;
+import com.linkedIn.features.networking.model.Connection;
 import com.linkedIn.features.notifications.model.Notification;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -36,6 +37,8 @@ public class AuthenticationUser {
     private String location = null;
     private Boolean profileComplete = false;
     private String profilePicture = null;
+    private String coverPicture = null;
+    private String about = null;
     @JsonIgnore
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
@@ -56,13 +59,13 @@ public class AuthenticationUser {
     @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Conversation> conversationsAsRecipient;
 
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Connection> initiatedConnections;
-//
-//    @JsonIgnore
-//    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Connection> receivedConnections;
+    @JsonIgnore
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Connection> initiatedConnections;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Connection> receivedConnections;
 
     public AuthenticationUser(String email, String password) {
         this.email = email;
@@ -169,6 +172,22 @@ public class AuthenticationUser {
                 && this.position != null && this.location != null);
     }
 
+    public String getCoverPicture() {
+        return coverPicture;
+    }
+
+    public void setCoverPicture(String coverPicture) {
+        this.coverPicture = coverPicture;
+    }
+
+    public String getAbout() {
+        return about;
+    }
+
+    public void setAbout(String about) {
+        this.about = about;
+    }
+
     public Boolean getProfileComplete() {
         return profileComplete;
     }
@@ -223,5 +242,21 @@ public class AuthenticationUser {
 
     public void setConversationsAsRecipient(List<Conversation> conversationsAsRecipient) {
         this.conversationsAsRecipient = conversationsAsRecipient;
+    }
+
+    public List<Connection> getInitiatedConnections() {
+        return initiatedConnections;
+    }
+
+    public void setInitiatedConnections(List<Connection> initiatedConnections) {
+        this.initiatedConnections = initiatedConnections;
+    }
+
+    public List<Connection> getReceivedConnections() {
+        return receivedConnections;
+    }
+
+    public void setReceivedConnections(List<Connection> receivedConnections) {
+        this.receivedConnections = receivedConnections;
     }
 }

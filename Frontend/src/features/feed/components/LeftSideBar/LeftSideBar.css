@@ -19,8 +19,8 @@
   
   .leftSidebar-avatar {
     margin-top: -2rem;
-    width: 6rem;
-    height: 6rem;
+    width: 5rem;
+    height: 5rem;
     margin-inline: auto;
     border-radius: 50%;
     overflow: hidden;
@@ -37,17 +37,18 @@
   
   .leftSidebar-name {
     font-weight: bold;
+    font-size: 0.8rem;
   }
   
   .leftSidebar-title {
     border-bottom: 1px solid #e0e0e0;
     padding-bottom: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
   }
   
   .leftSidebar-info {
     text-align: left;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     margin-top: 1rem;
     color: rgb(0 0 0 / 60%);
   }

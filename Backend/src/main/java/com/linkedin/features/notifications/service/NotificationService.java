@@ -5,6 +5,7 @@ import com.linkedIn.features.feed.model.Comment;
 import com.linkedIn.features.feed.model.Post;
 import com.linkedIn.features.messaging.model.Conversation;
 import com.linkedIn.features.messaging.model.Message;
+import com.linkedIn.features.networking.model.Connection;
 import com.linkedIn.features.notifications.model.Notification;
 import com.linkedIn.features.notifications.model.NotificationType;
 import com.linkedIn.features.notifications.repository.NotificationRepository;
@@ -110,25 +111,25 @@ public class NotificationService {
         messagingTemplate.convertAndSend("/topic/conversations/" + conversationId + "/messages", message);
     }
 
-//    public void sendNewInvitationToUsers(Long senderId, Long receiverId, Connection connection) {
-//        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/connections/new", connection);
-//        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/connections/new", connection);
-//    }
-//
-//
-//    public void sendInvitationAcceptedToUsers(Long senderId, Long receiverId, Connection connection) {
-//        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/connections/accepted", connection);
-//        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/connections/accepted", connection);
-//    }
-//
-//    public void sendRemoveConnectionToUsers(Long senderId, Long receiverId, Connection connection) {
-//        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/connections/remove", connection);
-//        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/connections/remove", connection);
-//    }
-//
-//    public void sendConnectionSeenNotification(Long id, Connection connection) {
-//        messagingTemplate.convertAndSend("/topic/users/" + id + "/connections/seen", connection);
-//    }
+    public void sendNewInvitationToUsers(Long senderId, Long receiverId, Connection connection) {
+        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/connections/new", connection);
+        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/connections/new", connection);
+    }
+
+
+    public void sendInvitationAcceptedToUsers(Long senderId, Long receiverId, Connection connection) {
+        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/connections/accepted", connection);
+        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/connections/accepted", connection);
+    }
+
+    public void sendRemoveConnectionToUsers(Long senderId, Long receiverId, Connection connection) {
+        messagingTemplate.convertAndSend("/topic/users/" + receiverId + "/connections/remove", connection);
+        messagingTemplate.convertAndSend("/topic/users/" + senderId + "/connections/remove", connection);
+    }
+
+    public void sendConnectionSeenNotification(Long id, Connection connection) {
+        messagingTemplate.convertAndSend("/topic/users/" + id + "/connections/seen", connection);
+    }
 
 
 }

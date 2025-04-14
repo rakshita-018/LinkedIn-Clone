@@ -54,7 +54,7 @@ export function Modal({ setShowModal, showModal, onSubmit, content, picture, tit
               onChange={() => setError("")}
               placeholder="Image URL (optional)"
               name="picture"
-              style={{ marginBlock: 0 }}
+              style={{ marginBlock: 0}}
             />
           </div>
           {error && <div className="modal-error">{error}</div>}
