@@ -1,0 +1,12 @@
+.connection-connections {
+  background-color: white;
+  border-radius: 0.3rem;
+  border: 1px solid #e0e0e0;
+  padding: 1rem;
+}
+
+.connection-empty {
+  margin-top: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+}

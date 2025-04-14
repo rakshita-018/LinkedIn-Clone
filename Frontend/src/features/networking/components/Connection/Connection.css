@@ -1,0 +1,33 @@
+.connections-connection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.connections-connection:not(:last-child) {
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.connections-avatar {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 50%;
+}
+
+.connections-name {
+  font-weight: bold;
+  font-size: 0.83rem;
+}
+
+.connections-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.connections-action {
+  margin: 0;
+}

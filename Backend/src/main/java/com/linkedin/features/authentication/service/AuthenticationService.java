@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
@@ -166,7 +167,7 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationUser updateUserProfile(Long userId, String firstName, String lastName, String company, String position, String location){
+    public AuthenticationUser updateUserProfile(Long userId, String firstName, String lastName, String company, String position, String location, String about){
         AuthenticationUser user = authenticationUserRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         if (firstName != null)
             user.setFirstName(firstName);
@@ -178,6 +179,8 @@ public class AuthenticationService {
             user.setPosition(position);
         if (location != null)
             user.setLocation(location);
+        if(about != null)
+            user.setAbout(about);
 
         return authenticationUserRepository.save(user);
     }
@@ -202,4 +205,54 @@ public class AuthenticationService {
     public AuthenticationUser getUserById(Long receiverId) {
         return authenticationUserRepository.findById(receiverId).orElseThrow(() -> new IllegalArgumentException("user not found"));
     }
+
+//    public AuthenticationUser updateUserProfile(AuthenticationUser user, String firstName, String lastName, String company,
+//                                  String position, String location, String about) {
+//        if (firstName != null)
+//            user.setFirstName(firstName);
+//        if (lastName != null)
+//            user.setLastName(lastName);
+//        if (company != null)
+//            user.setCompany(company);
+//        if (position != null)
+//            user.setPosition(position);
+//        if (location != null)
+//            user.setLocation(location);
+//        if (about != null)
+//            user.setAbout(about);
+//
+//        return AuthenticationUserRepository.save(user);
+//    }
+//
+//    public AuthenticationUser updateProfilePicture(AuthenticationUser user, MultipartFile profilePicture) throws IOException {
+//        if (profilePicture != null) {
+//            String profilePictureUrl = storageService.saveImage(profilePicture);
+//            user.setProfilePicture(profilePictureUrl);
+//        } else {
+//            if (user.getProfilePicture() != null)
+//                storageService.deleteFile(user.getProfilePicture());
+//
+//            user.setProfilePicture(null);
+//        }
+//        return AuthenticationUserRepository.save(user);
+//    }
+//
+//    public AuthenticationUser updateCoverPicture(AuthenticationUser user, MultipartFile coverPicture) throws IOException {
+//        if (coverPicture != null) {
+//            String coverPictureUrl = storageService.saveImage(coverPicture);
+//            user.setCoverPicture(coverPictureUrl);
+//        } else {
+//            if (user.getCoverPicture() != null)
+//                storageService.deleteFile(user.getCoverPicture());
+//
+//            user.setCoverPicture(null);
+//        }
+//
+//        return AuthenticationUserRepository.save(user);
+//    }
+//
+//    public AuthenticationUser getUserById(Long receiverId) {
+//        return AuthenticationUserRepository.findById(receiverId)
+//                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+//    }
 }

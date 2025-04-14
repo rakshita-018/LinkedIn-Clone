@@ -1,0 +1,42 @@
+.prof-profile {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .prof-main {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .prof-experience,
+  .prof-education,
+  .prof-skills {
+    background-color: white;
+    border-radius: 0.3rem;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    padding: 1rem;
+  }
+  
+  .prof-profile h2 {
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .prof-sidebar {
+    display: none;
+  }
+  
+  @media screen and (width >= 1024px) {
+    .prof-profile {
+      grid-template-columns: 1fr 20rem;
+      align-items: flex-start;
+    }
+  
+    .prof-sidebar {
+      display: block;
+      height: max-content;
+    }
+  }
+  

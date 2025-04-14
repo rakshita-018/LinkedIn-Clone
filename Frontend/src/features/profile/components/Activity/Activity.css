@@ -1,0 +1,22 @@
+.activity-activity {
+    background-color: white;
+    border-radius: 0.3rem;
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    padding: 1rem;
+  }
+  
+  .activity-posts {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  .activity-more {
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+    padding-top: 1rem;
+    display: block;
+    color: #0073b1;
+    text-decoration: none;
+  }
+  
