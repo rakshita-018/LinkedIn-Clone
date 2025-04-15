@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { useAuthentication } from '../../contexts/AuthenticationContextProvider';
 import { usePageTitle } from '../../../../hooks/usePageTitle';
 import { Button } from '../../../../components/Button/Button';
+import { Loader } from '../../../../components/loader/Loader';
+import { useOauth } from '../../hooks/useOauth';
 
 export function Login() {
     const [errorMessage, setErrorMessage] = useState("");
@@ -15,7 +17,7 @@ export function Login() {
     const { login } = useAuthentication();
     const location = useLocation();
     const navigate = useNavigate();
-    // const { isOauthInProgress, oauthError, startOauth } = useOauth("login");
+    const { isOauthInProgress, oauthError, startOauth } = useOauth("login");
     
     usePageTitle("Login");
 
@@ -36,51 +38,33 @@ export function Login() {
         }
     };
 
-    // if (isOauthInProgress) {
-    //     return <Loader isInline />;
-    // }
+    if (isOauthInProgress) {
+        return <Loader isInline />;
+    }
 
     return (
-        <div>
+        <div className="login-root">
             <Box>
-                <div className="login-root">
-                    <h1>Sign in</h1>
-                    <p>Stay updated on your professional world.</p>
-                    <form onSubmit={doLogin}>
-                    <Input label="Email" type="email" id="email" onFocus={() => setErrorMessage("")} />
-                    <Input label="Password" type="password" id="password" onFocus={() => setErrorMessage("")} />
-
-                        {errorMessage && <p className="error">{errorMessage}</p>}
-                        <Button type="submit" disabled={isLoading}> {isLoading ? "..." : "Sign in"}</Button>
-                        <Link to="/authentication/request-password-reset">Forgot password?</Link>
-                    </form>
-                    <Seperator>Or</Seperator>
-                    <div className="register">
-                        New to LinkedIn? <Link to="/authentication/signup">Join now</Link>
-                    </div>
-                    
-                    {/* <form onSubmit={doLogin}>
-                        <Input label="Email" type="email" id="email" onFocus={() => setErrorMessage("")} />
-                        <Input label="Password" type="password" id="password" onFocus={() => setErrorMessage("")} />
-                        {errorMessage && <p className="error">{errorMessage}</p>}
-
-                        <Button type="submit" disabled={isLoading}>
-                            {isLoading ? "..." : "Sign in"}
-                        </Button>
-                        <Link to="/authentication/request-password-reset">Forgot password?</Link>
-                    </form>
-                    <Seperator>Or</Seperator>
-                    <div className="register">
-                        {oauthError && <p className="error">{oauthError}</p>}
-                        <Button outline onClick={startOauth}>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-                                <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
-                            </svg>
-                            Continue with Google
-                        </Button>
-                        New to LinkedIn? <Link to="/authentication/signup">Join now</Link>
-                    </div> */}
-                </div>
+                <h1>Sign in</h1>
+                <p>Stay updated on your professional world.</p>
+                <form onSubmit={doLogin}>
+                <Input label="Email" type="email" id="email" onFocus={() => setErrorMessage("")} />
+                <Input label="Password" type="password" id="password" onFocus={() => setErrorMessage("")} />
+                    {errorMessage && <p className="error">{errorMessage}</p>}
+                    <Button type="submit" disabled={isLoading}> {isLoading ? "..." : "Sign in"}</Button>
+                    <Link className="forget-pass" to="/authentication/request-password-reset">Forgot password?</Link>
+                </form>
+                <Seperator>Or</Seperator>
+                <div className="register">
+                    {oauthError && <p className="error">{oauthError}</p>}
+                    <Button outline onClick={() => {startOauth()}}>
+                        <svg className='login-logo' xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
+                            <path d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z" />
+                        </svg>
+                        Continue with Google
+                    </Button>
+                    New to LinkedIn? <Link to="/authentication/signup">Join now</Link>
+                </div>                    
             </Box>
         </div>
     );

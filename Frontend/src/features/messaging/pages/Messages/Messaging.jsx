@@ -1,4 +1,3 @@
-// import { useEffect, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import "./Messaging.css";
 import { usePageTitle } from "../../../../hooks/usePageTitle";
@@ -26,7 +25,7 @@ export function Messaging() {
       <div className="message-messaging">
         <div className="message-sidebar"
           style={{
-            display: windowWidth >= 1024 || !onConversation ? "block" : "none",
+            display: windowWidth >= 1024 || !creatingNewConversation? "block" : "none",
           }}
         >
           <div className="message-header">
@@ -40,7 +39,6 @@ export function Messaging() {
               +
             </button>
           </div>
-          {/* <Conversations/> */}
           <Conversations
             style={{
               display: onConversation && windowWidth < 1024 ? "none" : "block",

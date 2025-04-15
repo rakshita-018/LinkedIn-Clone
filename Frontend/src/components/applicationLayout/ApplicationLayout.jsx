@@ -1,11 +1,9 @@
 import { Outlet } from "react-router-dom";
 import { WebSocketContextProvider } from "../../features/ws/Ws";
-
-import "./ApplicationLayout.css";
 import { Header } from "../header/Header";
-import { usePageTitle } from "../../hooks/usePageTitle";
+import "./ApplicationLayout.css";
+
 export function ApplicationLayout() {
-  usePageTitle("Home")
   return (
     <WebSocketContextProvider>
       <div className="appLayout-root">

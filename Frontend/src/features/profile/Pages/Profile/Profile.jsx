@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { usePageTitle } from "../../../../hooks/usePageTitle";
 import { request } from "../../../../utils/api";
-import {
-  useAuthentication,
-} from "../../../authentication/contexts/AuthenticationContextProvider";
+import {useAuthentication } from "../../../authentication/contexts/AuthenticationContextProvider";
 import { About } from "../../components/About/About";
 import { Activity } from "../../components/Activity/Activity";
 import { Header } from "../../components/Header/Header";
@@ -37,9 +35,9 @@ export function Profile() {
     }
   }, [authUser, id]);
 
-//   if (loading) {
-//     return <Loader />;
-//   }
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="prof-profile">

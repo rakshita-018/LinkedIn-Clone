@@ -3,12 +3,13 @@ import "./Post.css";
 import { useAuthentication } from "../../../authentication/contexts/AuthenticationContextProvider";
 import { useEffect, useState } from "react";
 import { Input } from "../../../../components/input/Input";
-import { timeAgo } from "../utils/date";
 import { Comment } from "../Comment/comment";
 import { Modal } from "../Modal/Modal";
 import { TimeAgo } from "../TimeAgo/TimeAgo";
 import { useWebSocket } from "../../../ws/Ws";
 import { request } from "../../../../utils/api";
+
+// delete post is not in request form. websock is also not exicuting
 
 export function Post({ post, setPosts }) {
     const [comments, setComments] = useState([]);
@@ -21,34 +22,18 @@ export function Post({ post, setPosts }) {
     const [editing, setEditing] = useState(false);
     const webSocketClient = useWebSocket();
     const [postLiked, setPostLiked] = useState(undefined);
-    // const [postLiked, setPostLiked] = useState(!!post.likes?.some((like) => like.id === user?.id));
-
-    // useEffect(() => {
-    //   setPostLiked(!!post.likes?.some((like) => like.id === user?.id));
-    // }, [post.likes, user?.id]);
-    
 
     useEffect(() => {
-      if (!post) return;
       const fetchComments = async () => {
-        try{
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/comments`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-          if(!response.ok) {
-            const { message } = await response.json();
-            throw new Error(message);
-          }
-          const commentsData = await response.json();
-          setComments(commentsData);
-              
-        }catch(e){
-          console.error(" ouldn't fetch comments", e)
-        }
+        await request({
+          endpoint: `/api/v1/feed/posts/${post.id}/comments`,
+          onSuccess: (data) => setComments(data),
+          onFailure: (error) => {
+            console.error(error);
+          },
+        });
       };
-      fetchComments() ;
+      fetchComments();
     }, [post.id]);
 
     useEffect(() => {
@@ -74,68 +59,55 @@ export function Post({ post, setPosts }) {
           });
         }
       );
-    
       return () => {
         subscription?.unsubscribe();
       };
     }, [post.id, webSocketClient]);
     
+    useEffect(() => {
+      const subscription = webSocketClient?.subscribe(
+        `/topic/comments/${post.id}/delete`,
+        (message) => {
+          const comment = JSON.parse(message.body);
+          setComments((prev) => {
+            return prev.filter((c) => c.id !== comment.id);
+          });
+        }
+      );
+  
+      return () => subscription?.unsubscribe();
+    }, [post.id, webSocketClient]);
 
     useEffect(() => {
-      if(!post) return;
+      const subscription = webSocketClient?.subscribe(`/topic/posts/${post.id}/delete`, () => {
+        setPosts((prev) => prev.filter((p) => p.id !== post.id));
+      });
+      return () => subscription?.unsubscribe();
+    }, [post.id, setPosts, webSocketClient]);
+
+    useEffect(() => {
+      const subscription = webSocketClient?.subscribe(`/topic/posts/${post.id}/edit`, (data) => {
+        const post = JSON.parse(data.body);
+        setPosts((prev) => prev.map((p) => (p.id === post.id ? post : p)));
+      });
+      return () => subscription?.unsubscribe();
+    }, [post.id, setPosts, webSocketClient]);
+
+    useEffect(() => {
       const fetchLikes = async () => {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-
-          if (!response.ok) {
-            const { message } = await response.json();
-            throw new Error(message);
-          }
-
-          const likesData = await response.json();
-          setLikes(likesData);
-          setPostLiked(likesData.some((like) => like.id === user?.id)); 
-
-        }catch (e) {
-          console.error("couldn't fetch likes", e);
-        }
+        await request({
+          endpoint: `/api/v1/feed/posts/${post.id}/likes`,
+          onSuccess: (data) => {
+            setLikes(data);
+            setPostLiked(data.some((like) => like.id === user?.id));
+          },
+          onFailure: (error) => {
+            console.error(error);
+          },
+        });
       };
       fetchLikes();
-    },[post.id, user?.id]);
-       
-    // const like = async () => {
-    //   // const newLikedState = !postLiked;
-    //   // setPostLiked(newLikedState);
-    
-    //   try {
-    //     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
-    //       method: "PUT",
-    //       headers: {
-    //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-    //       },
-    //     });
-    
-    //     if (!response.ok) {
-    //       const { message } = await response.json();
-    //       throw new Error(message);
-    //     }
-    
-    //     // // Update likes array manually to avoid extra API call
-    //     // setLikes((prevLikes) => 
-    //     //   newLikedState 
-    //     //     ? [...prevLikes, { id: user.id }]  // Add like
-    //     //     : prevLikes.filter((like) => like.id !== user.id) // Remove like
-    //     // );
-    
-    //   } catch (error) {
-    //     console.error("Error liking post:", error instanceof Error ? error.message : "Error occurred, try again");
-    //     // setPostLiked(!newLikedState); // Revert UI on failure
-    //   }
-    // };
+    }, [post.id, user?.id]);
    
     const like = async () => {
       await request({
@@ -147,6 +119,69 @@ export function Post({ post, setPosts }) {
         },
       });
     };
+
+    const postComment = async (e) => {
+      e.preventDefault();
+      if (!content) {
+        return;
+      }
+      await request({
+        endpoint: `/api/v1/feed/posts/${post.id}/comments`,
+        method: "POST",
+        body: JSON.stringify({ content }),
+        onSuccess: () => setContent(""),
+        onFailure: (error) => {
+          console.error(error);
+        },
+      });
+    };
+
+    const deleteComment = async (id) => {
+      await request({
+        endpoint: `/api/v1/feed/comments/${id}`,
+        method: "DELETE",
+        onSuccess: () => {
+          setComments((prev) => prev.filter((c) => c.id !== id));
+        },
+        onFailure: (error) => {
+          console.error(error);
+        },
+      });
+    };
+
+    const editComment = async (id, content) => {
+      await request({
+        endpoint: `/api/v1/feed/comments/${id}`,
+        method: "PUT",
+        body: JSON.stringify({ content }),
+        onSuccess: (data) => {
+          setComments((prev) =>
+            prev.map((c) => {
+              if (c.id === id) {
+                return data;
+              }
+              return c;
+            })
+          );
+        },
+        onFailure: (error) => {
+          console.error(error);
+        },
+      });
+    };
+
+    // const deletePost = async (id) => {
+    //   await request({
+    //     endpoint: `/api/v1/feed/posts/${id}`,
+    //     method: "DELETE",
+    //     onSuccess: () => {
+    //       setPosts((prev) => prev.filter((p) => p.id !== id));
+    //     },
+    //     onFailure: (error) => {
+    //       console.error(error);
+    //     },
+    //   });
+    // };
 
     const deletePost = async (id) => {
       try {
@@ -171,135 +206,29 @@ export function Post({ post, setPosts }) {
         console.error("Error deleting post:", e);
       }
     };
-    
-    const deleteComment = async(id) =>{
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/comments/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        if(!res.ok){
-          const {message} = await res.json();
-          throw new Error(message);
-        }
-        setComments((prevComments) => prevComments.filter((comment) => comment.id !== id ))
-      } catch (e) {
-        console.error(e);
-    }
-  }
 
-    const editComment = async (id, content) => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/comments/${id}`, {
-          method: "PUT",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ content }),
-        });
-    
-        if (!res.ok) {
-          const { message } = await res.json();
-          throw new Error(message);
-        }
-    
-        setComments((prevComments) =>
-          prevComments.map((comment) =>
-            comment.id === id ? { ...comment, content, updatedDate: new Date().toISOString() } : comment
-          )
-        );
-
-        if (!post) {
-          console.error("Post is undefined. Cannot update comments.");
-          return;
-        }        
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
-    // const postComment = async(e) =>{
-    //   e.preventDefault();
-    //   if(!content){
-    //     return;
-    //   }
-    //   try {
-    //     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/comments`, {
-    //       method: "POST",
-    //       headers: {
-    //         Authorization: `Bearer ${localStorage.getItem("token")}`,
-    //         "Content-Type": "application/json",
-    //       },
-    //       body: JSON.stringify({ content }),
-    //     });
-
-    //     if(!res.ok){
-    //       const { message } = await res.json();
-    //       throw new Error(message);
-    //     }
-    //     const data = await res.json();
-
-    //     setComments((prev) => [data, ...prev]);
-    //     setContent("");
-    //   }catch(e){
-    //     if(error instanceof Error){
-    //       console.error(error.message);
-    //     }else{
-    //       console.error("An error occurred while posting a comment:", e);
-    //     }
-    //   }
-    // };
-    
-    const postComment = async (e) => {
-      e.preventDefault();
-      if (!content) {
-        return;
-      }
+    const editPost = async (content, picture) => {
       await request({
-        endpoint: `/api/v1/feed/posts/${post.id}/comments`,
-        method: "POST",
-        body: JSON.stringify({ content }),
-        onSuccess: () => setContent(""),
+        endpoint: `/api/v1/feed/posts/${post.id}`,
+        method: "PUT",
+        body: JSON.stringify({content, picture}),
+        contentType: "application/json",
+        onSuccess: (data) => {
+          setPosts((prev) =>
+            prev.map((p) => 
+              (p?.id === post?.id) ? data : p 
+            )
+          );
+          setEditing(false);
+          setShowMenu(false);
+        },
         onFailure: (error) => {
-          console.error(error);
+          throw new Error(error);
         },
       });
     };
 
-    const editPost = async(content, picture) => {
-      try{
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}`, {
-          method: 'PUT',
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({content, picture}),
-        });
-  
-        if(!res.ok){
-          const { message } = await res.json();
-          throw new Error(message);
-        }
-  
-        const data = await res.json();
-        setPosts((prev) =>
-          prev.map((p) => 
-            (p?.id === post?.id) ? data : p 
-          )
-        );
-        setEditing(false);
-        setShowMenu(false);
-      }catch(e){
-        console.error("Error in upadting post: " , e);
-      }
-    }
-
     return(
-      
       <>
       {
         editing ?  (
@@ -336,7 +265,6 @@ export function Post({ post, setPosts }) {
                 edited={!!post.updatedDate}
                 className="post-date"
               />
-              {/* {post.updatedDate? ". Edited" : ""} */}
             </div>
           </div>
           <div>
@@ -397,7 +325,6 @@ export function Post({ post, setPosts }) {
                 <path d="M225.8 468.2l-2.5-2.3L48.1 303.2C17.4 274.7 0 234.7 0 192.8l0-3.3c0-70.4 50-130.8 119.2-144C158.6 37.9 198.9 47 231 69.6c9 6.4 17.4 13.8 25 22.3c4.2-4.8 8.7-9.2 13.5-13.3c3.7-3.2 7.5-6.2 11.5-9c0 0 0 0 0 0C313.1 47 353.4 37.9 392.8 45.4C462 58.6 512 119.1 512 189.5l0 3.3c0 41.9-17.4 81.9-48.1 110.4L288.7 465.9l-2.5 2.3c-8.2 7.6-19 11.9-30.2 11.9s-22-4.2-30.2-11.9z" />
             </svg>
             <span>{postLiked == undefined ? "Loading" : postLiked ? "Liked" : "Like"}</span>
-            {/* <span>{likes.some((like) => like.id === user?.id) ? "Liked" : "Like"}</span> */}
             </button>
         <button
             onClick={() => setShowComments((prev) => !prev)}
@@ -419,7 +346,6 @@ export function Post({ post, setPosts }) {
               value={content}
               placeholder="Add a comment..."
               name="content"
-              // className="comment-input"
             />
           </form>
 
@@ -439,121 +365,3 @@ export function Post({ post, setPosts }) {
 
     )
 }
-
-// export function Post({ post, setPosts }) {
-//     // const [postLiked, setPostLiked] = useState(!!post.likes?.some((like) => like.id === user?.id));
-
-//     const like = async () => {
-//       const newLikedState = !postLiked;
-//       setPostLiked(newLikedState); // Optimistically update state
-    
-//       try {
-//         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
-//           method: "PUT",
-//           headers: {
-//             Authorization: `Bearer ${localStorage.getItem("token")}`,
-//           },
-//         });
-    
-//         if (!response.ok) {
-//           const { message } = await response.json();
-//           throw new Error(message);
-//         }
-    
-//         // Update likes array manually to avoid extra API call
-//         setLikes((prevLikes) => 
-//           newLikedState 
-//             ? [...prevLikes, { id: user.id }]  // Add like
-//             : prevLikes.filter((like) => like.id !== user.id) // Remove like
-//         );
-    
-//       } catch (error) {
-//         console.error("Error liking post:", error instanceof Error ? error.message : "Error occurred, try again");
-//         setPostLiked(!newLikedState); // Revert UI on failure
-//       }
-//     };
-    
-// const like = async () => {
-//   setPostLiked((prev) => !prev);
-//   try{
-//     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
-//       method: "PUT",
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//       },
-//     });
-
-//     if (!response.ok) {
-//       const { message } = await response.json();
-//       throw new Error(message);
-//     }
-//     fetchLikes();
-//   }catch(e){
-//       if( error instanceof Error ){
-//         console.error("Error liking post:", error.message);
-//       }else{
-//         console.error("Error occured try again");
-//       }
-//       setPostLiked((prev) => !prev);
-//   }
-// }
-
-// const like = async () => {
-//   const newLikedState = !postLiked;
-//   setPostLiked(newLikedState);
-
-//   try {
-//     const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}/likes`, {
-//       method: "PUT",
-//       headers: {
-//         Authorization: `Bearer ${localStorage.getItem("token")}`,
-//       },
-//     });
-
-//     if (!response.ok) {
-//       const { message } = await response.json();
-//       throw new Error(message);
-//     }
-
-//     // Fetch latest likes from server
-//     const updatedLikesResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}`);
-//     if (!updatedLikesResponse.ok) {
-//       throw new Error("Failed to fetch updated post data");
-//     }
-
-//     const postData = await updatedLikesResponse.json();
-//     setLikes(postData.likes || []);
-
-//     // Ensure postLiked is correctly updated
-//     setPostLiked(postData.likes.some((like) => like.id === user?.id));
-//   } catch (error) {
-//     console.error("Error liking post:", error);
-//     setPostLiked(!newLikedState); // Revert on failure
-//   }
-// };
-
- // useEffect(() => {
-    //   if (!post) return;
-    //   const fetchPostData = async () => {
-    //     try {
-    //       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/feed/posts/${post.id}`, {
-    //         headers: {
-    //           Authorization: `Bearer ${localStorage.getItem("token")}`,
-    //         },
-    //       });
-    
-    //       if (!response.ok) {
-    //         const { message } = await response.json();
-    //         throw new Error(message);
-    //       }
-    
-    //       const postData = await response.json();
-    //       setLikes(postData.likes || []);
-    //     } catch (error) {
-    //       console.error("Error fetching post details:", error);
-    //     }
-    //   };
-    
-    //   fetchPostData();
-    // }, [post.id, postLiked]);
-

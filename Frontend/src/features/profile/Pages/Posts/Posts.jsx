@@ -7,7 +7,7 @@ import { Post } from "../../../feed/components/Post/Post";
 import "./Posts.css";
 import { LeftSideBar } from "../../../feed/components/LeftSideBar/LeftSideBar";
 import { RightSidebar } from "../../../feed/components/RightSideBar/RightSideBar";
-// import { Loader } from "../../../../components/loader/Loader";
+import { Loader } from "../../../../components/loader/Loader";
 
 export function Posts() {
   const { id } = useParams();
@@ -42,9 +42,9 @@ export function Posts() {
     });
   }, [id]);
 
-//   if (loading) {
-//     return <Loader />;
-//   }
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="profilePosts">

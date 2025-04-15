@@ -4,7 +4,7 @@ import { useAuthentication } from "../../../../features/authentication/contexts/
 import "./Profile.css";
 import { Button } from "../../../Button/Button";
 
-
+//TODO: profile and cover pictures from storage
 export function Profile({ showProfileMenu, setShowProfileMenu, setShowNavigationMenu }) {
   const { logout, user } = useAuthentication();
   const ref = useRef(null);

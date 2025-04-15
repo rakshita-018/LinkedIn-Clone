@@ -1,6 +1,13 @@
 
 form {
-    margin-top: 1rem;
+    margin-top: 0.5rem;
+}
+p{
+    font-size: 0.9rem;
+}
+
+.forget-pass{
+    font-size: 0.85rem;
 }
 
 .disclaimer {
@@ -9,9 +16,14 @@ form {
 
 .register {
     text-align: center;
+    font-size: 0.85rem;
 }
 
 .error {
     color: red;
     margin-bottom: 1rem;
+}
+
+.login-logo{
+    margin-right: 1rem;
 }

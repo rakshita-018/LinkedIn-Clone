@@ -47,7 +47,6 @@ export function LeftSideBar() {
     <div className="leftSidebar-root">
       <div className="leftSidebar-cover">
         <img src={user?.coverPicture || "/cover.jpeg"} alt="Cover" />
-        {/* <img src="/Linkedinbanner.png" alt="" /> */}
       </div>
       <button className="leftSidebar-avatar" onClick={() => navigate("/profile/" + user?.id)}>
         <img src={user?.profilePicture || "/avatar.svg"} alt="" />

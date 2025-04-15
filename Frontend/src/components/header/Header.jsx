@@ -37,45 +37,18 @@ export function Header(){
       return () => window.removeEventListener("resize", handleResize);
     }, []);
 
-
     useEffect(() => {
-        const handleResize = () => {
-          setShowNavigationMenu(window.innerWidth > 1080);
-        };
-        window.addEventListener("resize", handleResize);
-        return () => window.removeEventListener("resize", handleResize);
-    }, []);
-
+      request({
+        endpoint: "/api/v1/messaging/conversations",
+        onSuccess: (data) => setConversations(data),
+        onFailure: (error) => console.log(error),
+      });
+    }, [location.pathname]);
 
     useEffect(() => {
       request({
         endpoint: "/api/v1/notifications",
         onSuccess: setNotifications,
-        onFailure: (error) => console.log(error),
-      });
-    }, []);
-    
-    useEffect(() => {
-      const subscribtion = webSocketClient?.subscribe(
-        `/topic/users/${user?.id}/notifications`,
-        (message) => {
-          const notification = JSON.parse(message.body);
-          setNotifications((prev) => {
-            const index = prev.findIndex((n) => n.id === notification.id);
-            if (index === -1) {
-              return [notification, ...prev];
-            }
-            return prev.map((n) => (n.id === notification.id ? notification : n));
-          });
-        }
-      );
-      return () => subscribtion?.unsubscribe();
-    }, [user?.id, webSocketClient]);
-
-    useEffect(() => {
-      request({
-        endpoint: "/api/v1/messaging/conversations",
-        onSuccess: setConversations,
         onFailure: (error) => console.log(error),
       });
     }, []);
@@ -97,8 +70,24 @@ export function Header(){
       );
       return () => subscribtion?.unsubscribe();
     }, [user?.id, webSocketClient]);
-
     
+    useEffect(() => {
+      const subscribtion = webSocketClient?.subscribe(
+        `/topic/users/${user?.id}/notifications`,
+        (message) => {
+          const notification = JSON.parse(message.body);
+          setNotifications((prev) => {
+            const index = prev.findIndex((n) => n.id === notification.id);
+            if (index === -1) {
+              return [notification, ...prev];
+            }
+            return prev.map((n) => (n.id === notification.id ? notification : n));
+          });
+        }
+      );
+      return () => subscribtion?.unsubscribe();
+    }, [user?.id, webSocketClient]);
+  
     useEffect(() => {
       request({
         endpoint: "/api/v1/networking/connections?status=PENDING",
@@ -120,6 +109,7 @@ export function Header(){
       );
       return () => subscription?.unsubscribe();
     }, [user?.id, webSocketClient]);
+    
     useEffect(() => {
     const subscription = webSocketClient?.subscribe(
       "/topic/users/" + user?.id + "/connections/accepted",

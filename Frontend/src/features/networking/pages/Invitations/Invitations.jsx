@@ -29,7 +29,6 @@ export function Invitations() {
       const connection = JSON.parse(data.body);
       setConnections((prev) => [connection, ...prev]);
     });
-
     return () => subscription?.unsubscribe();
   }, [user?.id, ws]);
 
@@ -38,7 +37,6 @@ export function Invitations() {
       const connection = JSON.parse(data.body);
       setConnections((prev) => prev.filter((c) => c.id !== connection.id));
     });
-
     return () => subscription?.unsubscribe();
   }, [user?.id, ws]);
 
@@ -47,7 +45,6 @@ export function Invitations() {
       const connection = JSON.parse(data.body);
       setConnections((prev) => prev.filter((c) => c.id !== connection.id));
     });
-
     return () => subscription?.unsubscribe();
   }, [user?.id, ws]);
 

@@ -3,6 +3,8 @@ import "./Modal.css";
 import { Button } from "../../../../components/Button/Button";
 import { Input } from "../../../../components/input/Input";
 
+//creating post, image uploading
+
 export function Modal({ setShowModal, showModal, onSubmit, content, picture, title }) {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
