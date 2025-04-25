@@ -58,7 +58,7 @@ export function Search() {
                     {user.position} at {user.company}
                   </div>
                 </div>
-              </button>
+              </button> 
             </li>
           ))}
         </ul>
