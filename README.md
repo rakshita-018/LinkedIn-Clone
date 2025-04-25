@@ -48,7 +48,7 @@ A full-stack LinkedIn clone that replicates core features of the professional ne
 ### 🧠 Backend
 - **Spring Boot** (REST API)
 - **Spring Security** (JWT, OAuth2)
-- **Hibernate + JPA** (ORM)
+- **Hibernate + JPA**
 - **Hibernate Search + Lucene** (Full-text search)
 - **MySQL** (Relational database)
 - **WebSockets** (Real-time chat)
