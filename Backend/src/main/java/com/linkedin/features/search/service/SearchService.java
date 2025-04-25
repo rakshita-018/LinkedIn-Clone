@@ -1,7 +1,6 @@
 package com.linkedIn.features.search.service;
 
 import com.linkedIn.features.authentication.model.AuthenticationUser;
-import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.massindexing.MassIndexer;

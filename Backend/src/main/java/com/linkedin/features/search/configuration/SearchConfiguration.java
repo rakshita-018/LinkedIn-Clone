@@ -1,13 +1,6 @@
 package com.linkedIn.features.search.configuration;
 
-import com.linkedIn.features.authentication.model.AuthenticationUser;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import jakarta.persistence.EntityManager;
-import org.springframework.transaction.annotation.Transactional;
-import org.hibernate.search.mapper.orm.Search;
-import org.hibernate.search.mapper.orm.massindexing.MassIndexer;
-import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
