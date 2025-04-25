@@ -9,6 +9,7 @@ import com.linkedIn.features.feed.service.FeedService;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -24,7 +25,7 @@ public class FeedController {
 
     @GetMapping("/")
     public ResponseEntity<List<Post>> getFeedPosts(@RequestAttribute("authenticatedUser") AuthenticationUser user){
-        List<Post> posts = feedService.getFeedPost(user.getId());
+        List<Post> posts = feedService.getFeedPosts(user.getId());
         return ResponseEntity.ok(posts);
     }
 
@@ -34,22 +35,39 @@ public class FeedController {
         return ResponseEntity.ok(posts);
     }
 
+//    @PostMapping("/posts")
+//    public ResponseEntity<Post> createPost(@RequestBody PostDto postDto, @RequestAttribute("authenticatedUser") AuthenticationUser user) {
+//        Post post = feedService.createPost(postDto, user.getId());
+//        return ResponseEntity.ok(post);
+//    }
+
     @PostMapping("/posts")
-    public ResponseEntity<Post> createPost(@RequestBody PostDto postDto, @RequestAttribute("authenticatedUser") AuthenticationUser user) {
-        Post post = feedService.createPost(postDto, user.getId());
+    public ResponseEntity<Post> createPost(@RequestParam(value = "picture", required = false) MultipartFile picture,
+                                           @RequestParam("content") String content,
+                                           @RequestAttribute("authenticatedUser") AuthenticationUser user) throws Exception {
+        Post post = feedService.createPost(picture, content, user.getId());
         return ResponseEntity.ok(post);
     }
 
-    @PutMapping("/posts/{postId}")
-    public ResponseEntity<Post> editPost(@PathVariable Long postId, @RequestBody PostDto postDto, @RequestAttribute("authenticatedUser") AuthenticationUser user){
-        Post post = feedService.editPost(postId, user.getId(),postDto);
-        return ResponseEntity.ok(post);
-    }
     @GetMapping("/posts/{postId}")
     public ResponseEntity<Post> getPost(@PathVariable Long postId) {
         Post post = feedService.getPost(postId);
         return ResponseEntity.ok(post);
     }
+
+//    @PutMapping("/posts/{postId}")
+//    public ResponseEntity<Post> editPost(@PathVariable Long postId, @RequestBody PostDto postDto, @RequestAttribute("authenticatedUser") AuthenticationUser user){
+//        Post post = feedService.editPost(postId, user.getId(),postDto);
+//        return ResponseEntity.ok(post);
+//    }
+    @PutMapping("/posts/{postId}")
+    public ResponseEntity<Post> editPost(@PathVariable Long postId, @RequestParam(value = "picture", required = false) MultipartFile picture,
+                                         @RequestParam("content") String content,
+                                         @RequestAttribute("authenticatedUser") AuthenticationUser user) throws Exception {
+        Post post = feedService.editPost(postId, user.getId(), picture, content);
+        return ResponseEntity.ok(post);
+    }
+
 
     @DeleteMapping("/posts/{postId}")
     public ResponseEntity<Void> deletePost(@PathVariable Long postId, @RequestAttribute("authenticatedUser") AuthenticationUser user) {

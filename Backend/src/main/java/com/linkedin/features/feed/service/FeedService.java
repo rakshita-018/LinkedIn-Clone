@@ -7,11 +7,18 @@ import com.linkedIn.features.feed.model.Comment;
 import com.linkedIn.features.feed.model.Post;
 import com.linkedIn.features.feed.repository.CommentRepository;
 import com.linkedIn.features.feed.repository.PostRepository;
+import com.linkedIn.features.networking.model.Connection;
+import com.linkedIn.features.networking.model.Status;
+import com.linkedIn.features.networking.repository.ConnectionRepository;
 import com.linkedIn.features.notifications.service.NotificationService;
+import com.linkedIn.features.storage.service.StorageService;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FeedService {
@@ -20,38 +27,66 @@ public class FeedService {
     private final AuthenticationUserRepository userRepository;
     private final CommentRepository commentRepository;
     private final NotificationService notificationService;
+    private final ConnectionRepository connectionRepository;
+    private final StorageService storageService;
 
     public FeedService(PostRepository postRepository, AuthenticationUserRepository userRepository,
-                       CommentRepository commentRepository, NotificationService notificationService) {
+                       CommentRepository commentRepository, NotificationService notificationService, ConnectionRepository connectionRepository, StorageService storageService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.notificationService = notificationService;
+        this.connectionRepository = connectionRepository;
+        this.storageService = storageService;
     }
 
-    public Post createPost(PostDto postDto, Long authorId ) {
-        AuthenticationUser author = userRepository.findById(authorId).orElseThrow(() -> new IllegalArgumentException("user not found"));
-        Post post = new Post(postDto.getContent(), author);
-        post.setPicture(postDto.getPicture());
-//        notificationService.sendNewPostNotificationToFeed(post);
+    public Post createPost(MultipartFile picture, String content, Long id) throws Exception {
+        AuthenticationUser author = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        String pictureUrl = storageService.saveImage(picture);
+
+        Post post = new Post(content, author);
+        post.setPicture(pictureUrl);
+        post.setLikes(new HashSet<>());
+
+        notificationService.sendNewPostNotificationToFeed(post);
+
         return postRepository.save(post);
     }
 
-    public Post editPost(Long postId, Long userId, PostDto postDto) {
-        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("post not found"));
-        AuthenticationUser user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("user not found"));
+    public Post editPost(Long postId, Long id, MultipartFile picture, String content) throws Exception {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        AuthenticationUser user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if(!post.getAuthor().equals(user)){
+        if (!post.getAuthor().equals(user)) {
             throw new IllegalArgumentException("User is not the author of the post");
         }
-        post.setContent(postDto.getContent());
-        post.setPicture(postDto.getPicture());
+
+        String pictureUrl = storageService.saveImage(picture);
+
+        post.setContent(content);
+        post.setPicture(pictureUrl);
+
         notificationService.sendEditNotificationToPost(postId, post);
+
         return postRepository.save(post);
     }
 
-    public List<Post> getFeedPost(Long authenticatedUserId) {
-        return postRepository.findByAuthorIdNotOrderByCreationDateDesc(authenticatedUserId);
+//    public List<Post> getFeedPost(Long authenticatedUserId) {
+//        return postRepository.findByAuthorIdNotOrderByCreationDateDesc(authenticatedUserId);
+//    }
+
+    public List<Post> getFeedPosts(Long authenticatedUserId) {
+        List<Connection> connections = connectionRepository.findByAuthorIdAndStatusOrRecipientIdAndStatus(
+                authenticatedUserId, Status.ACCEPTED, authenticatedUserId, Status.ACCEPTED);
+
+        Set<Long> connectedUserIds = connections.stream()
+                .map(connection -> connection.getAuthor().getId().equals(authenticatedUserId)
+                        ? connection.getRecipient().getId()
+                        : connection.getAuthor().getId())
+                .collect(Collectors.toSet());
+
+        return postRepository.findByAuthorIdInOrderByCreationDateDesc(connectedUserIds);
     }
 
     public List<Post> getAllPost() {
@@ -70,6 +105,7 @@ public class FeedService {
         if (!post.getAuthor().equals(user)) {
             throw new IllegalArgumentException("User is not the author of the post");
         }
+        notificationService.sendDeleteNotificationToPost(postId);
         postRepository.delete(post);
     }
 

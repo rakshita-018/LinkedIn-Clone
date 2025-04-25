@@ -20,6 +20,7 @@
 .connections-name {
   font-weight: bold;
   font-size: 0.83rem;
+  text-align: left;
 }
 
 .connections-actions {
