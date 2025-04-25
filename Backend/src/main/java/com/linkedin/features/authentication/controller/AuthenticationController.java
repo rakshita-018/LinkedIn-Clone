@@ -1,5 +1,6 @@
 package com.linkedIn.features.authentication.controller;
 
+import com.linkedIn.features.authentication.dto.AuthenticationOauthRequestBody;
 import com.linkedIn.features.authentication.dto.AuthenticationRequestBody;
 import com.linkedIn.features.authentication.dto.AuthenticationResponseBody;
 import com.linkedIn.features.authentication.model.AuthenticationUser;
@@ -29,6 +30,11 @@ public class AuthenticationController {
     @PostMapping("/login")
     public AuthenticationResponseBody loginPage(@Valid @RequestBody AuthenticationRequestBody loginRequestBody ){
         return authenticationService.login(loginRequestBody);
+    }
+
+    @PostMapping("/oauth/google/login")
+    public AuthenticationResponseBody googleLogin(@RequestBody AuthenticationOauthRequestBody oauth2RequestBody) {
+        return authenticationService.googleLoginOrSignup(oauth2RequestBody.code(), oauth2RequestBody.page());
     }
 
     @PostMapping("/register")
@@ -93,28 +99,27 @@ public class AuthenticationController {
     public List<AuthenticationUser> getUsersWithoutAuthenticated(@RequestAttribute("authenticatedUser") AuthenticationUser user){
         return authenticationService.getUsersWithoutAuthenticated(user);
     }
-//
-//    @PutMapping("/profile/{id}/info")
-//    public AuthenticationUser updateUserProfile(
-//            @RequestAttribute("authenticatedUser") AuthenticationUser user,
-//            @PathVariable Long id,
-//            @RequestParam(required = false) String firstName,
-//            @RequestParam(required = false) String lastName,
-//            @RequestParam(required = false) String company,
-//            @RequestParam(required = false) String position,
-//            @RequestParam(required = false) String location,
-//            @RequestParam(required = false) String about) {
-//
-//        if (!user.getId().equals(id)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-//                    "User does not have permission to update this profile.");
-//        }
-//
-//        return authenticationService.updateUserProfile(
-//                user,
-//                firstName, lastName, company, position, location, about);
-//    }
-//
+
+    @PutMapping("/profile/{id}/info")
+    public AuthenticationUser updateUserProfile(
+            @RequestAttribute("authenticatedUser") AuthenticationUser user,
+            @PathVariable Long id,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String position,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String about) {
+
+        if (!user.getId().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "User does not have permission to update this profile.");
+        }
+
+        return authenticationService.updateUserProfile(
+                user.getId(), firstName, lastName, company, position, location, about);
+    }
+
 //    @PutMapping("/profile/{id}/profile-picture")
 //    public AuthenticationUser updateProfilePicture(
 //            @RequestAttribute("authenticatedUser") AuthenticationUser user,

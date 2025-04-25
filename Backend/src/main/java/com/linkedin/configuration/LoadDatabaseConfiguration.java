@@ -32,7 +32,7 @@ public class LoadDatabaseConfiguration {
 
     private List<AuthenticationUser> createUsers(AuthenticationUserRepository authenticationUserRepository){
         List<AuthenticationUser> users = List.of(
-            createUser("rakshita@example.com", "asdf", "Rakshita", "gidd", "SED", "Google", "Benglore", "https://images.unsplash.com/photo-1494790108377-be9c29b29330"),
+            createUser("rakshita1812@gmail.com", "asdf", "Rakshita", "gidd", "SED", "Google", "Benglore", "https://images.unsplash.com/photo-1494790108377-be9c29b29330"),
             createUser("krishna@example.com", "asdf", "Vasudev", "Shastri", "Analyst", "Microsoft", "Benglore", "https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"),
             createUser("radha@example.com", "asdf", "radha", "vrishbhan", "Software Tester", "Cisco", "Benglore", "https://plus.unsplash.com/premium_photo-1690407617542-2f210cf20d7e?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")
                 );

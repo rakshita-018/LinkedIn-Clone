@@ -38,10 +38,10 @@ export function Conversation({ conversation: initialConversation }) {
             ),
           };
         });
+        return () => subscription?.unsubscribe();
       }
     );
-    return () => subscription?.unsubscribe();
-  }, [conversation.id, ws]);
+  }, [conversation?.id, ws]);
 
   const isSelected = id && Number(id) === conversation.id;
 
@@ -54,7 +54,8 @@ export function Conversation({ conversation: initialConversation }) {
       <img
         className="convo-avatar"
         src={conversationUserToDisplay.profilePicture || "/avatar.svg"}
-        alt={`${conversationUserToDisplay.firstName} ${conversationUserToDisplay.lastName}`}
+        alt=""
+        // alt={`${conversationUserToDisplay.firstName} ${conversationUserToDisplay.lastName}`}
       />
 
       {unreadMessagesCount > 0 && (

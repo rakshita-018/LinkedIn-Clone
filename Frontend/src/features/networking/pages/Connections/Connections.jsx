@@ -27,7 +27,6 @@ export function Connections() {
         setConnections((prev) => prev.filter((c) => c.id !== connection.id));
       }
     );
-
     return () => subscription?.unsubscribe();
   }, [user?.id, ws]);
 

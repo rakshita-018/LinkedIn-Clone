@@ -9,7 +9,7 @@
   max-width: 74rem;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 a {
@@ -37,13 +37,12 @@ header a {
 
 main {
   display: grid;
-  /* align-items: center; */
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 1.3rem;
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 0.3rem;
 }
 
 footer {

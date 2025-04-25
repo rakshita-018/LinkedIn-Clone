@@ -15,7 +15,6 @@ export function Conversation() {
   const [search, setSearch] = useState("");
   const [slectedUser, setSelectedUser] = useState(null);
   const [conversations, setConversations] = useState([]);
-
   const [conversation, setConversation] = useState();
   const websocketClient = useWebSocket();
   const { id } = useParams();
@@ -51,10 +50,9 @@ export function Conversation() {
     if (id === "new") {
       setConversation(null);
       request({
-        // endpoint: "/api/v1/networking/connections",
-        endpoint: "/api/v1/authentication/users",
-        onSuccess: (data) => setSuggestingUsers(data),
-          // setSuggestingUsers(data.map((c) => (c.author.id === user?.id ? c.recipient : c.author))),
+        endpoint: "/api/v1/networking/connections",
+        onSuccess: (data) =>        
+        setSuggestingUsers(data.map((c) => (c.author.id === user?.id ? c.recipient : c.author))),
         onFailure: (error) => console.log(error),
       });
     } else {
@@ -97,6 +95,7 @@ export function Conversation() {
           : conversation?.recipient.id,
         content,
       }),
+      onSuccess: () => {},
       onFailure: (error) => console.log(error),
     });
     setPostingMessage(false);
@@ -116,9 +115,6 @@ export function Conversation() {
 
   const conversationUserToDisplay =
     conversation?.recipient.id === user?.id ? conversation?.author : conversation?.recipient;
-
-
-
 
   return (
     <div className={`conversation-root ${creatingNewConversation ? "conversation-new" : ""}`}>

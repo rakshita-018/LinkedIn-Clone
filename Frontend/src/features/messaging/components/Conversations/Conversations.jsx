@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Conversation } from "./components/Conversation/Conversation"
 import { request } from "../../../../utils/api"
+import { useWebSocket } from '../../../ws/Ws';
+import { useAuthentication } from '../../../authentication/contexts/AuthenticationContextProvider';
+
 
 export function Conversations(){
     const [conversations, setConversations] = useState([]);
-    
+    const { user } = useAuthentication();
+    const websocketClient = useWebSocket();
+
     useEffect(() => {
         request({
           endpoint: "/api/v1/messaging/conversations",
@@ -12,6 +17,25 @@ export function Conversations(){
           onFailure: (error) => console.log(error),
         });
       }, []);
+
+      useEffect(() => {
+        const subscription = websocketClient?.subscribe(
+          `/topic/users/${user?.id}/conversations`,
+          (message) => {
+            const conversation = JSON.parse(message.body);
+            setConversations((prevConversations) => {
+              const index = prevConversations.findIndex((c) => c.id === conversation.id);
+              if (index === -1) {
+                return [conversation, ...prevConversations];
+              }
+              return prevConversations.map((c) => (c.id === conversation.id ? conversation : c));
+            });
+          }
+        );
+        return () => subscription?.unsubscribe();
+      }, [user?.id, websocketClient]);
+
+
     return (
         <div className='conversations-root'>
             {conversations.map((conversation) => (

@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { usePageTitle } from '../../../../hooks/usePageTitle'
 import { Button } from '../../../../components/Button/Button'
-
+import { request } from '../../../../utils/api'
 
 export function ResetPassword(){
     const [emailSent, setEmailSent] = useState(false);
@@ -32,8 +32,6 @@ export function ResetPassword(){
         setIsLoading(false);
     };
 
-
-  
     const resetPassword = async (email, code, password) => {
         setIsLoading(true);
         await request({
@@ -97,7 +95,8 @@ export function ResetPassword(){
                                 setErrorMessage("");
                             }}
                             disabled ={isLoading}
-                            >{isLoading ? "..." : "Back"}</Button>
+                            >{isLoading ? "..." : "Back"}
+                            </Button>
                         </form>
                         
                     )

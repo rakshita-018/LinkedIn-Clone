@@ -19,6 +19,7 @@ public class AuthenticationFilter extends HttpFilter {
     private final List<String> unsecuredEndpoints = Arrays.asList(
             "/api/v1/authentication/login",
             "/api/v1/authentication/register",
+            "/api/v1/authentication/oauth/google/login",
             "/api/v1/authentication/send-password-reset-token",
             "/api/v1/authentication/reset-password",
             "/ws", "/ws/", "/ws/info", "/ws/info/**", "/ws/**"    );
