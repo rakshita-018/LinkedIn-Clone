@@ -20,6 +20,88 @@ export function Header({ user, authUser, onUpdate }) {
     connexions.find((c) => c.recipient.id === user?.id || c.author.id === user?.id) ||
     invitations.find((c) => c.recipient.id === user?.id || c.author.id === user?.id);
 
+  const [editingProfilePicture, setEditingProfilePicture] = useState(false);
+  const [editingCoverPicture, setEditingCoverPicture] = useState(false);
+  const fileInputRef = useRef(null);
+  const [newProfilePicture, setNewProfilePicture] = useState(null);
+  const [newProfilePicturePreview, setNewProfilePicturePreview] = useState(
+    user?.profilePicture
+      ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.profilePicture}`
+      : "/avatar.svg"
+  );
+  const [newCoverPicture, setNewCoverPicture] = useState(null);
+  const [newCoverPicturePreview, setNewCoverPicturePreview] = useState(
+    user?.coverPicture
+      ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.coverPicture}`
+      : "/cover.jpeg"
+  );
+  async function updateProfilePicture() {
+    const formData = new FormData();
+    formData.append(
+      "profilePicture",
+      newProfilePicture === null
+        ? ""
+        : newProfilePicture
+        ? newProfilePicture
+        : user?.profilePicture || ""
+    );
+
+    await request({
+      endpoint: `/api/v1/authentication/profile/${user?.id}/profile-picture`,
+      method: "PUT",
+      contentType: "multipart/form-data",
+      body: formData,
+      onSuccess: (data) => {
+        onUpdate(data);
+        setEditingProfilePicture(false);
+      },
+      onFailure: (error) => console.log(error),
+    });
+  }
+
+  async function updateCoverPicture() {
+    const formData = new FormData();
+    formData.append(
+      "coverPicture",
+      newCoverPicture === null ? "" : newCoverPicture ? newCoverPicture : user?.coverPicture || ""
+    );
+
+    await request({
+      endpoint: `/api/v1/authentication/profile/${user?.id}/cover-picture`,
+      method: "PUT",
+      contentType: "multipart/form-data",
+      body: formData,
+      onSuccess: (data) => {
+        onUpdate(data);
+        setEditingCoverPicture(false);
+      },
+      onFailure: (error) => console.log(error),
+    });
+  }
+
+  const handleFileChange = (e, type) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (type === "profile") {
+        setNewProfilePicture(file);
+      } else {
+        setNewCoverPicture(file);
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (type === "profile") {
+          setNewProfilePicturePreview(reader.result);
+        } else {
+          setNewCoverPicturePreview(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
   useEffect(() => {
     request({
       endpoint: "/api/v1/networking/connections",
@@ -59,11 +141,66 @@ export function Header({ user, authUser, onUpdate }) {
 
   return(
     <div className="head-top">
-      <img className="head-cover" src={user?.coverPicture || "/cover.jpeg"} alt="" />
+      <div className="head-cover-wrapper">
+        {user?.id === authUser?.id && (
+            <button className="head-edit" onClick={() => setEditingCoverPicture(true)}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <path d="M362.7 19.3L314.3 67.7 444.3 197.7l48.4-48.4c25-25 25-65.5 0-90.5L453.3 19.3c-25-25-65.5-25-90.5 0zm-71 71L58.6 323.5c-10.4 10.4-18 23.3-22.2 37.4L1 481.2C-1.5 489.7 .8 498.8 7 505s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L421.7 220.3 291.7 90.3z" />
+              </svg>
+            </button>
+        )}
+        <img className="head-cover"
+          src={
+            user?.coverPicture
+              ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.coverPicture}`
+              : "/cover.jpeg"
+          }
+          alt=""
+        />
+      </div>
 
+      {editingCoverPicture && (
+        <ProfileAndCoverPictureUpdateModal
+          newPicturePreview={newCoverPicturePreview}
+          setNewPicturePreview={setNewCoverPicturePreview}
+          setNewPicture={setNewCoverPicture}
+          fileInputRef={fileInputRef}
+          handleFileChange={(e) => handleFileChange(e, "cover")}
+          triggerFileInput={triggerFileInput}
+          updatePicture={updateCoverPicture}
+          setEditingPicture={setEditingCoverPicture}
+          type="cover"
+        />
+      )}
+
+      {editingProfilePicture && (
+        <ProfileAndCoverPictureUpdateModal
+          newPicturePreview={newProfilePicturePreview}
+          setNewPicturePreview={setNewProfilePicturePreview}
+          setNewPicture={setNewProfilePicture}
+          fileInputRef={fileInputRef}
+          handleFileChange={(e) => handleFileChange(e, "profile")}
+          triggerFileInput={triggerFileInput}
+          updatePicture={updateProfilePicture}
+          setEditingPicture={setEditingProfilePicture}
+          type="profile"
+        />
+      )}
+
+      {user?.id === authUser?.id ? (
+        <button className="head-avatar" onClick={() => setEditingProfilePicture(true)}>
+          <img src={newProfilePicturePreview} alt="" />
+        </button>
+      ) : (
+        <div className="head-avatar">
+          <img src={newProfilePicturePreview} alt="" />
+        </div>
+      )}
+
+{/*         
       <div className="head-avatar">
         <img src={user?.profilePicture || "/avatar.svg"} alt="" />
-      </div>
+      </div> */}
 
       <div className="head-wrapper"> 
         <div className="head-info">
@@ -140,9 +277,9 @@ export function Header({ user, authUser, onUpdate }) {
                       })
                     }}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-                      <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
-                    </svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                    <path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+                  </svg>
                   </button>
                   <button onClick={updateInfo}>
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
@@ -179,147 +316,64 @@ export function Header({ user, authUser, onUpdate }) {
   )
 
 
-    // const [editingProfilePicture, setEditingProfilePicture] = useState(false);
-  // const [editingCoverPicture, setEditingCoverPicture] = useState(false);
-  // const fileInputRef = useRef(null);
-   // const [newProfilePicture, setNewProfilePicture] = useState(null);
-  // const [newProfilePicturePreview, setNewProfilePicturePreview] = useState(
-  //   user?.profilePicture
-  //     ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.profilePicture}`
-  //     : "/avatar.svg"
-  // );
-  // const [newCoverPicture, setNewCoverPicture] = useState(null);
-  // const [newCoverPicturePreview, setNewCoverPicturePreview] = useState(
-  //   user?.coverPicture
-  //     ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.coverPicture}`
-  //     : "/cover.jpeg"
-  // );
-  // async function updateProfilePicture() {
-  //   const formData = new FormData();
-  //   formData.append(
-  //     "profilePicture",
-  //     newProfilePicture === null
-  //       ? ""
-  //       : newProfilePicture
-  //       ? newProfilePicture
-  //       : user?.profilePicture || ""
-  //   );
-
-  //   await request({
-  //     endpoint: `/api/v1/authentication/profile/${user?.id}/profile-picture`,
-  //     method: "PUT",
-  //     contentType: "multipart/form-data",
-  //     body: formData,
-  //     onSuccess: (data) => {
-  //       onUpdate(data);
-  //       setEditingProfilePicture(false);
-  //     },
-  //     onFailure: (error) => console.log(error),
-  //   });
-  // }
-
-  // async function updateCoverPicture() {
-  //   const formData = new FormData();
-  //   formData.append(
-  //     "coverPicture",
-  //     newCoverPicture === null ? "" : newCoverPicture ? newCoverPicture : user?.coverPicture || ""
-  //   );
-
-  //   await request({
-  //     endpoint: `/api/v1/authentication/profile/${user?.id}/cover-picture`,
-  //     method: "PUT",
-  //     contentType: "multipart/form-data",
-  //     body: formData,
-  //     onSuccess: (data) => {
-  //       onUpdate(data);
-  //       setEditingCoverPicture(false);
-  //     },
-  //     onFailure: (error) => console.log(error),
-  //   });
-  // }
-
-  // const handleFileChange = (e, type) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     if (type === "profile") {
-  //       setNewProfilePicture(file);
-  //     } else {
-  //       setNewCoverPicture(file);
-  //     }
-  //     const reader = new FileReader();
-  //     reader.onload = () => {
-  //       if (type === "profile") {
-  //         setNewProfilePicturePreview(reader.result);
-  //       } else {
-  //         setNewCoverPicturePreview(reader.result);
-  //       }
-  //     };
-  //     reader.readAsDataURL(file);
-  //   }
-  // };
-
-  // const triggerFileInput = () => {
-  //   fileInputRef.current?.click();
-  // };
-
   // return (
   //   <div className="head-header">
-  //     <div className="head-cover-wrapper">
-  //       {user?.id === authUser?.id && (
-  //         <button className="head-edit" onClick={() => setEditingCoverPicture(true)}>
-  //           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  //             <path d="..." />
-  //           </svg>
-  //         </button>
-  //       )}
-  //       <img
-  //         className="head-cover"
-  //         src={
-  //           user?.coverPicture
-  //             ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.coverPicture}`
-  //             : "/cover.jpeg"
-  //         }
-  //         alt=""
-  //       />
+      // <div className="head-cover-wrapper">
+        // {user?.id === authUser?.id && (
+        //   <button className="head-edit" onClick={() => setEditingCoverPicture(true)}>
+        //     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        //       <path d="..." />
+        //     </svg>
+        //   </button>
+        // )}
+        // <img
+        //   className="head-cover"
+        //   src={
+        //     user?.coverPicture
+        //       ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.coverPicture}`
+        //       : "/cover.jpeg"
+        //   }
+        //   alt=""
+        // />
   //     </div>
 
-  //     {editingCoverPicture && (
-  //       <ProfileAndCoverPictureUpdateModal
-  //         newPicturePreview={newCoverPicturePreview}
-  //         setNewPicturePreview={setNewCoverPicturePreview}
-  //         setNewPicture={setNewCoverPicture}
-  //         fileInputRef={fileInputRef}
-  //         handleFileChange={(e) => handleFileChange(e, "cover")}
-  //         triggerFileInput={triggerFileInput}
-  //         updatePicture={updateCoverPicture}
-  //         setEditingPicture={setEditingCoverPicture}
-  //         type="cover"
-  //       />
-  //     )}
+      // {editingCoverPicture && (
+      //   <ProfileAndCoverPictureUpdateModal
+      //     newPicturePreview={newCoverPicturePreview}
+      //     setNewPicturePreview={setNewCoverPicturePreview}
+      //     setNewPicture={setNewCoverPicture}
+      //     fileInputRef={fileInputRef}
+      //     handleFileChange={(e) => handleFileChange(e, "cover")}
+      //     triggerFileInput={triggerFileInput}
+      //     updatePicture={updateCoverPicture}
+      //     setEditingPicture={setEditingCoverPicture}
+      //     type="cover"
+      //   />
+      // )}
 
-  //     {editingProfilePicture && (
-  //       <ProfileAndCoverPictureUpdateModal
-  //         newPicturePreview={newProfilePicturePreview}
-  //         setNewPicturePreview={setNewProfilePicturePreview}
-  //         setNewPicture={setNewProfilePicture}
-  //         fileInputRef={fileInputRef}
-  //         handleFileChange={(e) => handleFileChange(e, "profile")}
-  //         triggerFileInput={triggerFileInput}
-  //         updatePicture={updateProfilePicture}
-  //         setEditingPicture={setEditingProfilePicture}
-  //         type="profile"
-  //       />
-  //     )}
+      // {editingProfilePicture && (
+      //   <ProfileAndCoverPictureUpdateModal
+      //     newPicturePreview={newProfilePicturePreview}
+      //     setNewPicturePreview={setNewProfilePicturePreview}
+      //     setNewPicture={setNewProfilePicture}
+      //     fileInputRef={fileInputRef}
+      //     handleFileChange={(e) => handleFileChange(e, "profile")}
+      //     triggerFileInput={triggerFileInput}
+      //     updatePicture={updateProfilePicture}
+      //     setEditingPicture={setEditingProfilePicture}
+      //     type="profile"
+      //   />
+      // )}
 
-  //     {user?.id === authUser?.id ? (
-  //       <button className="head-avatar" onClick={() => setEditingProfilePicture(true)}>
-  //         <img src={newProfilePicturePreview} alt="" />
-  //       </button>
-  //     ) : (
-  //       <div className="head-avatar">
-  //         <img src={newProfilePicturePreview} alt="" />
-  //       </div>
-  //     )}
+      // {user?.id === authUser?.id ? (
+      //   <button className="head-avatar" onClick={() => setEditingProfilePicture(true)}>
+      //     <img src={newProfilePicturePreview} alt="" />
+      //   </button>
+      // ) : (
+      //   <div className="head-avatar">
+      //     <img src={newProfilePicturePreview} alt="" />
+      //   </div>
+      // )}
 
   //     <div className="head-wrapper">
   //       <div className="head-info">

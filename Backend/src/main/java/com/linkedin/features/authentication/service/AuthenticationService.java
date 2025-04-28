@@ -7,6 +7,7 @@ import com.linkedIn.features.authentication.repository.AuthenticationUserReposit
 import com.linkedIn.features.authentication.utils.EmailService;
 import com.linkedIn.features.authentication.utils.Encoder;
 import com.linkedIn.features.authentication.utils.JsonWebToken;
+import com.linkedIn.features.storage.service.StorageService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
@@ -21,6 +22,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import io.jsonwebtoken.Claims;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,12 +34,13 @@ import java.util.Optional;
 public class AuthenticationService {
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
     private static AuthenticationUserRepository authenticationUserRepository;
-    private final int durationInMinutes = 1;
+    private final int durationInMinutes = 5;
 
     private final Encoder encoder;
     private final JsonWebToken jsonWebToken;
     private final EmailService emailService;
     private final RestTemplate restTemplate;
+    private final StorageService storageService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -46,12 +50,13 @@ public class AuthenticationService {
     private String googleClientSecret;
 
 
-    public AuthenticationService(AuthenticationUserRepository authenticationUserRepository, Encoder encoder, JsonWebToken jsonWebToken, EmailService emailService,RestTemplate restTemplate) {
+    public AuthenticationService(AuthenticationUserRepository authenticationUserRepository, Encoder encoder, JsonWebToken jsonWebToken, EmailService emailService, RestTemplate restTemplate, StorageService storageService) {
         this.authenticationUserRepository = authenticationUserRepository;
         this.encoder = encoder;
         this.jsonWebToken = jsonWebToken;
         this.emailService = emailService;
         this.restTemplate = restTemplate;
+        this.storageService = storageService;
     }
 
     public static String generateEmailVerificationToken() {
@@ -78,6 +83,7 @@ public class AuthenticationService {
                     emailVerificationToken, durationInMinutes);
             try {
                 emailService.sendEmail(email, subject, body);
+                System.out.println("Email verification token is sent service");
             } catch (Exception e) {
                 logger.info("Error while sending email: {}", e.getMessage());
             }
@@ -182,8 +188,21 @@ public class AuthenticationService {
         String authToken = jsonWebToken.generateToken(registerRequestBody.getEmail());
         return new AuthenticationResponseBody(authToken, "User registered successfully.");
     }
+
     public AuthenticationUser getUser(String email){
         return authenticationUserRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("user not found"));
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        AuthenticationUser user = entityManager.find(AuthenticationUser.class, userId);
+        if (user != null) {
+            entityManager.createNativeQuery("DELETE FROM posts_likes WHERE user_id = :userId")
+                    .setParameter("userId", userId)
+                    .executeUpdate();
+            entityManager.remove(user);
+//            authenticationUserRepository.deleteById(userId);
+        }
     }
 
 //    password reset token
@@ -245,74 +264,63 @@ public class AuthenticationService {
         return authenticationUserRepository.save(user);
     }
 
-    @Transactional
-    public void deleteUser(Long userId) {
-        AuthenticationUser user = entityManager.find(AuthenticationUser.class, userId);
-        if (user != null) {
-            entityManager.createNativeQuery("DELETE FROM posts_likes WHERE user_id = :userId")
-                    .setParameter("userId", userId)
-                    .executeUpdate();
-//            entityManager.remove(user);
-            authenticationUserRepository.deleteById(userId);
+    public AuthenticationUser updateUserProfile(AuthenticationUser user, String firstName, String lastName, String company,
+                                  String position, String location, String about) {
+        if (firstName != null)
+            user.setFirstName(firstName);
+        if (lastName != null)
+            user.setLastName(lastName);
+        if (company != null)
+            user.setCompany(company);
+        if (position != null)
+            user.setPosition(position);
+        if (location != null)
+            user.setLocation(location);
+        if (about != null)
+            user.setAbout(about);
+
+        return authenticationUserRepository.save(user);
+    }
+
+    public AuthenticationUser updateProfilePicture(AuthenticationUser user, MultipartFile profilePicture) throws IOException, IOException {
+        if (profilePicture != null) {
+            String profilePictureUrl = storageService.saveImage(profilePicture);
+            user.setProfilePicture(profilePictureUrl);
+        } else {
+            if (user.getProfilePicture() != null)
+                storageService.deleteFile(user.getProfilePicture());
+
+            user.setProfilePicture(null);
+        }
+        return authenticationUserRepository.save(user);
+    }
+
+    public AuthenticationUser updateCoverPicture(AuthenticationUser user, MultipartFile coverPicture) throws IOException {
+        if (coverPicture != null) {
+            String coverPictureUrl = storageService.saveImage(coverPicture);
+            user.setCoverPicture(coverPictureUrl);
+        } else {
+            if (user.getCoverPicture() != null)
+                storageService.deleteFile(user.getCoverPicture());
+
+            user.setCoverPicture(null);
         }
 
+        return authenticationUserRepository.save(user);
     }
+
 
     public List<AuthenticationUser> getUsersWithoutAuthenticated(AuthenticationUser user) {
         return authenticationUserRepository.findAllByIdNot(user.getId());
     }
 
-    public AuthenticationUser getUserById(Long receiverId) {
-        return authenticationUserRepository.findById(receiverId).orElseThrow(() -> new IllegalArgumentException("user not found"));
-    }
-
-//    public AuthenticationUser updateUserProfile(AuthenticationUser user, String firstName, String lastName, String company,
-//                                  String position, String location, String about) {
-//        if (firstName != null)
-//            user.setFirstName(firstName);
-//        if (lastName != null)
-//            user.setLastName(lastName);
-//        if (company != null)
-//            user.setCompany(company);
-//        if (position != null)
-//            user.setPosition(position);
-//        if (location != null)
-//            user.setLocation(location);
-//        if (about != null)
-//            user.setAbout(about);
-//
-//        return AuthenticationUserRepository.save(user);
-//    }
-//
-//    public AuthenticationUser updateProfilePicture(AuthenticationUser user, MultipartFile profilePicture) throws IOException {
-//        if (profilePicture != null) {
-//            String profilePictureUrl = storageService.saveImage(profilePicture);
-//            user.setProfilePicture(profilePictureUrl);
-//        } else {
-//            if (user.getProfilePicture() != null)
-//                storageService.deleteFile(user.getProfilePicture());
-//
-//            user.setProfilePicture(null);
-//        }
-//        return AuthenticationUserRepository.save(user);
-//    }
-//
-//    public AuthenticationUser updateCoverPicture(AuthenticationUser user, MultipartFile coverPicture) throws IOException {
-//        if (coverPicture != null) {
-//            String coverPictureUrl = storageService.saveImage(coverPicture);
-//            user.setCoverPicture(coverPictureUrl);
-//        } else {
-//            if (user.getCoverPicture() != null)
-//                storageService.deleteFile(user.getCoverPicture());
-//
-//            user.setCoverPicture(null);
-//        }
-//
-//        return AuthenticationUserRepository.save(user);
-//    }
-//
 //    public AuthenticationUser getUserById(Long receiverId) {
-//        return AuthenticationUserRepository.findById(receiverId)
-//                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+//        return authenticationUserRepository.findById(receiverId).orElseThrow(() -> new IllegalArgumentException("user not found"));
 //    }
+
+
+    public AuthenticationUser getUserById(Long receiverId) {
+        return authenticationUserRepository.findById(receiverId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found."));
+    }
 }

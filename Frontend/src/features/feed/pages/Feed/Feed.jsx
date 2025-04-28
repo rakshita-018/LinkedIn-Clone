@@ -47,12 +47,12 @@ import { useWebSocket } from '../../../ws/Ws';
       return () => subscription?.unsubscribe();
     }, [user?.id, ws]);
 
-    const handlePost = async (content, picture) => {
+    const handlePost = async (data) => {
       await request({
         endpoint: "/api/v1/feed/posts",
         method: "POST",
-        contentType: "application/json",
-        body: JSON.stringify({ content, picture }),
+        contentType: "multipart/form-data",
+        body: data,
         onSuccess: (data) => {
           setPosts([data, ...posts]);
           setShowPostingModal(false);
@@ -97,9 +97,13 @@ import { useWebSocket } from '../../../ws/Ws';
                         }}
                     >
                         <img
-                        className="feed-top feed-avatar"
-                        src={user?.profilePicture || "/avatar.svg"}
-                        alt=""
+                          className="feed-top feed-avatar"
+                          src={
+                            user?.profilePicture
+                              ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.profilePicture}`
+                              : "/avatar.svg"
+                          }                        
+                          alt=""
                         />
                     </button>
                     <Button outline onClick={() => setShowPostingModal(true)}>

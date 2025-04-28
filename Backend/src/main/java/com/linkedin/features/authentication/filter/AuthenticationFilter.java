@@ -22,6 +22,7 @@ public class AuthenticationFilter extends HttpFilter {
             "/api/v1/authentication/oauth/google/login",
             "/api/v1/authentication/send-password-reset-token",
             "/api/v1/authentication/reset-password",
+            "/api/v1/storage",
             "/ws", "/ws/", "/ws/info", "/ws/info/**", "/ws/**"    );
 
     private final JsonWebToken jsonWebTokenService;

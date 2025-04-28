@@ -46,10 +46,18 @@ export function LeftSideBar() {
   return (
     <div className="leftSidebar-root">
       <div className="leftSidebar-cover">
-        <img src={user?.coverPicture || "/cover.jpeg"} alt="Cover" />
+        <img src={
+            user?.coverPicture
+              ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.coverPicture}`
+              : "/cover.jpeg"
+          } alt="Cover" />
       </div>
       <button className="leftSidebar-avatar" onClick={() => navigate("/profile/" + user?.id)}>
-        <img src={user?.profilePicture || "/avatar.svg"} alt="" />
+        <img  src={
+            user?.profilePicture
+              ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.profilePicture}`
+              : "/avatar.svg"
+          } alt="" />
       </button>
       <div className="leftSidebar-name">{user?.firstName + " " + user?.lastName}</div>
       <div className="leftSidebar-title">{user?.position + " at " + user?.company}</div>

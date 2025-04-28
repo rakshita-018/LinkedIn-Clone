@@ -30,12 +30,12 @@ export function RightSidebar() {
       <h3 className="rightSidebar-heading">Add to your connections</h3>
       <div className="rightSidebar-items">
         {suggestions.map((suggestion) => (
-          <div className="rightSidebar-item" >
+          <div className="rightSidebar-item" key={suggestion.id}>
             <button
               className="rightSidebar-avatar"
               onClick={() => navigate("/profile/" + suggestion.id)}
             >
-              <img src={suggestion.profilePicture || "/avatar.svg"} alt="" className="rightSidebar-avatar"/>
+              <img src={suggestion.profilePicture || "/avatar.svg"} alt="" className="rightSidebar-avatar" />
             </button>
             <div className="rightSidebar-content">
               <button onClick={() => navigate("/profile/" + suggestion.id)}>
@@ -66,6 +66,7 @@ export function RightSidebar() {
             </div>
           </div>
         ))}
+
 
         {suggestions.length === 0 && !loading && (
           <div className="rightSidebar-empty">

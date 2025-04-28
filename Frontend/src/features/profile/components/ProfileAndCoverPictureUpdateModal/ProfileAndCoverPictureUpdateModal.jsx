@@ -17,7 +17,7 @@ export function ProfileAndCoverPictureUpdateModal({
       <div className="updateContent">
         <header className="updateHeader">
           <h3>{type === "profile" ? "Changing profile picture" : "Changing cover picture"}</h3>
-          <button onClick={() => setEditingPicture(false)}>X</button>
+          <button className="logo" onClick={() => setEditingPicture(false)}>X</button>
         </header>
         {type === "profile" ? (
           <div className="updateAvatar">

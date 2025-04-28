@@ -5,17 +5,17 @@ import com.linkedIn.features.authentication.dto.AuthenticationRequestBody;
 import com.linkedIn.features.authentication.dto.AuthenticationResponseBody;
 import com.linkedIn.features.authentication.model.AuthenticationUser;
 import com.linkedIn.features.authentication.service.AuthenticationService;
-import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/authentication")
@@ -52,15 +52,26 @@ public class AuthenticationController {
     public AuthenticationUser getUser(@RequestAttribute("authenticatedUser") AuthenticationUser user){
         return user;
     }
+//    @PutMapping("/validate-email-verification-token")
+//    public String verifyEmail(@RequestParam String token, @RequestAttribute("authenticatedUser") AuthenticationUser user) {
+//        authenticationService.validateEmailVerificationToken(token, user.getEmail());
+//        return "Email verified successfully.";
+//    }
     @PutMapping("/validate-email-verification-token")
-    public String verifyEmail(@RequestParam String token, @RequestAttribute("authenticatedUser") AuthenticationUser user) {
+    public ResponseEntity<Map<String, String>> verifyEmail(@RequestParam String token, @RequestAttribute("authenticatedUser") AuthenticationUser user) {
         authenticationService.validateEmailVerificationToken(token, user.getEmail());
-        return "Email verified successfully.";
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Email verified successfully.");
+
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/send-email-verification-token")
     public String sendEmailVerificationToken(@RequestAttribute("authenticatedUser") AuthenticationUser user) {
         authenticationService.sendEmailVerificationToken(user.getEmail());
+        System.out.println("Email verification token is sent to service");
         return "Email verification token sent successfully.";
     }
 
@@ -95,11 +106,6 @@ public class AuthenticationController {
 
     }
 
-    @GetMapping("/users")
-    public List<AuthenticationUser> getUsersWithoutAuthenticated(@RequestAttribute("authenticatedUser") AuthenticationUser user){
-        return authenticationService.getUsersWithoutAuthenticated(user);
-    }
-
     @PutMapping("/profile/{id}/info")
     public AuthenticationUser updateUserProfile(
             @RequestAttribute("authenticatedUser") AuthenticationUser user,
@@ -120,39 +126,44 @@ public class AuthenticationController {
                 user.getId(), firstName, lastName, company, position, location, about);
     }
 
-//    @PutMapping("/profile/{id}/profile-picture")
-//    public AuthenticationUser updateProfilePicture(
-//            @RequestAttribute("authenticatedUser") AuthenticationUser user,
-//            @PathVariable Long id,
-//            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) throws IOException {
+    @PutMapping("/profile/{id}/profile-picture")
+    public AuthenticationUser updateProfilePicture(
+            @RequestAttribute("authenticatedUser") AuthenticationUser user,
+            @PathVariable Long id,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) throws IOException {
+
+        if (!user.getId().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "User does not have permission to update this profile picture.");
+        }
+
+        return authenticationService.updateProfilePicture(user, profilePicture);
+    }
+
+    @PutMapping("/profile/{id}/cover-picture")
+    public AuthenticationUser updateCoverPicture(
+            @RequestAttribute("authenticatedUser") AuthenticationUser user,
+            @PathVariable Long id,
+            @RequestParam(required = false) MultipartFile coverPicture) throws IOException {
+
+        if (!user.getId().equals(id)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "User does not have permission to update this cover picture.");
+        }
+
+        return authenticationService.updateCoverPicture(user, coverPicture);
+    }
 //
-//        if (!user.getId().equals(id)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-//                    "User does not have permission to update this profile picture.");
-//        }
-//
-//        return authenticationService.updateProfilePicture(user, profilePicture);
+//    @GetMapping("/users/me")
+//    public AuthenticationUser getUser(@RequestAttribute("authenticatedUser") AuthenticationUser user) {
+//        return user;
 //    }
-//
-//    @PutMapping("/profile/{id}/cover-picture")
-//    public AuthenticationUser updateCoverPicture(
-//            @RequestAttribute("authenticatedUser") AuthenticationUser user,
-//            @PathVariable Long id,
-//            @RequestParam(required = false) MultipartFile coverPicture) throws IOException {
-//
-//        if (!user.getId().equals(id)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-//                    "User does not have permission to update this cover picture.");
-//        }
-//
-//        return authenticationService.updateCoverPicture(user, coverPicture);
-//    }
-//
-////    @GetMapping("/users/me")
-////    public AuthenticationUser getUser(@RequestAttribute("authenticatedUser") AuthenticationUser user) {
-////        return user;
-////    }
-//
+
+    @GetMapping("/users")
+    public List<AuthenticationUser> getUsersWithoutAuthenticated(@RequestAttribute("authenticatedUser") AuthenticationUser user){
+        return authenticationService.getUsersWithoutAuthenticated(user);
+    }
+
     @GetMapping("/users/{id}")
     public AuthenticationUser getUserById(@PathVariable Long id) {
         return authenticationService.getUserById(id);

@@ -32,7 +32,11 @@ export function Profile({ showProfileMenu, setShowProfileMenu, setShowNavigation
           }
         }}
       >
-        <img className="profile-avatar" src={user?.profilePicture || "/avatar.svg"} alt="" />
+        <img className="profile-avatar"
+         src={user?.profilePicture
+              ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.profilePicture}`
+              : "/avatar.svg"
+          } alt="" />
         <div className="profile-name">
           <div>{user?.firstName + " " + user?.lastName?.charAt(0) + "."}</div>
         </div>
@@ -43,7 +47,11 @@ export function Profile({ showProfileMenu, setShowProfileMenu, setShowNavigation
           <div className="profile-content">
             <img
               className="profile-avatar profile-left"
-              src={user?.profilePicture || "/avatar.svg"}
+              src={
+                user?.profilePicture
+                  ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${user?.profilePicture}`
+                  : "/avatar.svg"
+              }              
               alt=""
             />
             <div className="profile-right">

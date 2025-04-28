@@ -6,6 +6,7 @@ import com.linkedIn.features.feed.model.Post;
 import com.linkedIn.features.messaging.model.Conversation;
 import com.linkedIn.features.messaging.model.Message;
 import com.linkedIn.features.networking.model.Connection;
+import com.linkedIn.features.networking.model.Status;
 import com.linkedIn.features.notifications.model.Notification;
 import com.linkedIn.features.notifications.model.NotificationType;
 import com.linkedIn.features.notifications.repository.NotificationRepository;
@@ -88,18 +89,18 @@ public class NotificationService {
         messagingTemplate.convertAndSend("/topic/users/" + recipient.getId() + "/notifications", notification);
     }
 
-    //    public void sendNewPostNotificationToFeed(Post post) {
-//        for (Connection connection : post.getAuthor().getInitiatedConnections()) {
-//            if (connection.getStatus().equals(Status.ACCEPTED)) {
-//                messagingTemplate.convertAndSend("/topic/feed/" + connection.getRecipient().getId() + "/post", post);
-//            }
-//        }
-//        for (Connection connection : post.getAuthor().getReceivedConnections()) {
-//            if (connection.getStatus().equals(Status.ACCEPTED)) {
-//                messagingTemplate.convertAndSend("/topic/feed/" + connection.getAuthor().getId() + "/post", post);
-//            }
-//        }
-//    }
+        public void sendNewPostNotificationToFeed(Post post) {
+        for (Connection connection : post.getAuthor().getInitiatedConnections()) {
+            if (connection.getStatus().equals(Status.ACCEPTED)) {
+                messagingTemplate.convertAndSend("/topic/feed/" + connection.getRecipient().getId() + "/post", post);
+            }
+        }
+        for (Connection connection : post.getAuthor().getReceivedConnections()) {
+            if (connection.getStatus().equals(Status.ACCEPTED)) {
+                messagingTemplate.convertAndSend("/topic/feed/" + connection.getAuthor().getId() + "/post", post);
+            }
+        }
+    }
 
     public void sendConversationToUsers(Long senderId, Long receiverId, Conversation conversation) {
         messagingTemplate.convertAndSend("/topic/users/" + senderId + "/conversations", conversation);

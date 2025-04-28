@@ -38,6 +38,7 @@ export function Post({ post, setPosts }) {
 
     useEffect(() => {
       const subscription = webSocketClient?.subscribe(`/topic/likes/${post.id}`, (message) => {
+        console.log("WebSocket received likes update:", message.body);
         const likes = JSON.parse(message.body);
         setLikes(likes);
         setPostLiked(likes.some((like) => like.id === user?.id));
@@ -207,12 +208,12 @@ export function Post({ post, setPosts }) {
       }
     };
 
-    const editPost = async (content, picture) => {
+    const editPost = async (data) => {
       await request({
         endpoint: `/api/v1/feed/posts/${post.id}`,
         method: "PUT",
-        body: JSON.stringify({content, picture}),
-        contentType: "application/json",
+        body: data,
+        contentType: "multipart/form-data",
         onSuccess: (data) => {
           setPosts((prev) =>
             prev.map((p) => 
@@ -249,7 +250,11 @@ export function Post({ post, setPosts }) {
             <button onClick={() => navigate(`/profile/${post.author.id}`)}>
               <img
                 className="post-avatar"
-                src={post.author.profilePicture || "/avatar.svg"}
+                src={
+                  post.author.profilePicture
+                    ? `${import.meta.env.VITE_API_URL}/api/v1/storage/${post.author.profilePicture}`
+                    : "/avatar.svg"
+                }
                 alt=""
               />
             </button>
@@ -287,7 +292,7 @@ export function Post({ post, setPosts }) {
           </div>
         </div>
         <div className="post-content">{post.content}</div>
-        {post.picture && <img src={post.picture} alt="" className="post-picture" />}
+        {post.picture && <img src={`${import.meta.env.VITE_API_URL}/api/v1/storage/${post.picture}`} alt="" className="post-picture" />}
       
             
         <div className="post-stats">
